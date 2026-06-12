@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Stop Loss · Genesis 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafbfc;--surface:#ffffff;--surface-2:#f8fafc;
+  --border:#e2e8f0;--border-2:#cbd5e1;
+  --ink:#0f172a;--ink-2:#334155;--mut:#64748b;--mut-2:#94a3b8;
+  --kill:#dc2626;--scale:#059669;--maintain:#d97706;--promote:#2563eb;--observe:#7c3aed;
+  --accent:#1e293b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-size:16px}
+body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.display{font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em}
+
+/* 16:9 video-ready slide stage */
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a}
+.deck{position:relative;width:min(95vw, calc(95vh * 16/9));height:min(95vh, calc(95vw * 9/16));aspect-ratio:16/9;background:var(--bg);border-radius:8px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.slide{position:absolute;inset:0;padding:5.5% 6.5%;display:flex;flex-direction:column;justify-content:center;opacity:0;transition:opacity .4s cubic-bezier(.2,.7,.2,1);pointer-events:none;background:var(--bg)}
+.slide.active{opacity:1;pointer-events:auto}
+
+.slide-num{position:absolute;top:24px;right:32px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut);font-weight:600;letter-spacing:.08em}
+.slide-tag{position:absolute;top:24px;left:46px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut);font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.slide-tag::before{content:"";display:inline-block;width:24px;height:1px;background:var(--ink);margin-right:10px;vertical-align:middle}
+.section-marker{position:absolute;bottom:24px;right:32px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut-2);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+
+/* Nav */
+.nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(15,23,42,.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 14px;font-size:11.5px;color:#cbd5e1;z-index:100;font-family:'JetBrains Mono',monospace}
+.nav button{border:none;background:none;cursor:pointer;color:#94a3b8;font-size:13px;padding:2px 4px;font-family:'JetBrains Mono',monospace}
+.nav button:hover{color:white}
+.nav .pos{min-width:50px;text-align:center;color:white;font-weight:700}
+.dots{display:flex;gap:4px;align-items:center}
+.dots .d{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .15s}
+.dots .d.active{background:white;transform:scale(1.4)}
+
+/* SLIDE 1 — Title */
+.slide.cover{justify-content:center;align-items:stretch;background:linear-gradient(135deg,#fff 0%,#f1f5f9 100%);padding:5.5% 6.5%}
+.cover-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;height:100%}
+.cover-text{display:flex;flex-direction:column;justify-content:center}
+.cover-image{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;background:#0f172a;box-shadow:0 20px 60px rgba(15,23,42,.18)}
+.cover-image img{width:100%;height:100%;object-fit:cover;object-position:center;border-radius:18px}
+.cover-image .img-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;padding:24px}
+.cover-image .img-fallback .ic{font-size:48px;margin-bottom:14px;opacity:.6}
+.cover .stamp{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:28px}
+.cover .stamp .dot{width:8px;height:8px;border-radius:50%;background:var(--kill)}
+.cover h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(72px,9vw,144px);font-weight:900;letter-spacing:-.04em;line-height:.9;color:var(--ink)}
+.cover h1 .accent{color:var(--kill)}
+.cover .tagline{font-size:19px;color:var(--mut);margin-top:24px;font-weight:400;line-height:1.5}
+.cover .tagline b{color:var(--ink);font-weight:600}
+.cover .footer-stamp{position:absolute;bottom:26px;left:46px;display:flex;gap:18px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut);letter-spacing:.1em}
+.cover .meta-right{position:absolute;bottom:26px;right:46px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut);line-height:1.65}
+.cover .meta-right b{color:var(--ink);font-weight:700}
+
+/* Generic content slide */
+.slide h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,4.5vw,58px);font-weight:800;letter-spacing:-.025em;line-height:1.05;color:var(--ink);margin-bottom:16px;max-width:1300px}
+.slide h2 .hl{color:var(--kill)}
+.slide h2 .hg{color:var(--scale)}
+.slide h2 .hb{color:var(--promote)}
+.slide h2 .hv{color:var(--observe)}
+.slide .lede{font-size:21px;color:var(--mut);max-width:1100px;margin-bottom:28px;line-height:1.5}
+.slide .lede b{color:var(--ink);font-weight:600}
+
+/* Stat grids */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:14px}
+.stat-row.three{grid-template-columns:repeat(3,1fr)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px;position:relative;overflow:hidden}
+.stat-card .stat-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.stat-card .stat-big{font-family:'Space Grotesk',sans-serif;font-size:46px;font-weight:900;letter-spacing:-.03em;margin-top:12px;line-height:.95;color:var(--ink)}
+.stat-card .stat-sub{font-size:13px;color:var(--mut);margin-top:8px;line-height:1.45}
+.stat-card.kill{border-color:#fecaca;background:linear-gradient(135deg,#fef2f2,#fff)}.stat-card.kill .stat-big{color:var(--kill)}
+.stat-card.scale{border-color:#a7f3d0;background:linear-gradient(135deg,#ecfdf5,#fff)}.stat-card.scale .stat-big{color:var(--scale)}
+.stat-card.promote{border-color:#bfdbfe;background:linear-gradient(135deg,#eff6ff,#fff)}.stat-card.promote .stat-big{color:var(--promote)}
+.stat-card.gold{border-color:#fde68a;background:linear-gradient(135deg,#fffbeb,#fff)}.stat-card.gold .stat-big{color:var(--maintain)}
+
+/* Two-column */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:14px}
+.two-col .col h3{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em}
+.two-col .col p{font-size:15.5px;color:var(--mut);line-height:1.6;margin-bottom:8px}
+.two-col .col ul{list-style:none}
+.two-col .col ul li{font-size:15.5px;color:var(--ink-2);padding:7px 0 7px 24px;position:relative;line-height:1.5}
+.two-col .col ul li::before{content:"→";position:absolute;left:0;color:var(--mut-2);font-weight:600}
+.two-col .col ul li b{color:var(--ink);font-weight:600}
+
+/* Formula box */
+.formula-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--ink);max-width:980px}
+.formula-box .formula-line{margin:8px 0}
+.formula-box .formula-line b{font-weight:700;color:var(--kill)}
+.formula-box .formula-arrow{color:var(--mut);font-size:18px}
+.formula-box .note{margin-top:16px;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--mut);font-style:italic}
+
+/* Table */
+.bt-table{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.bt-table table{width:100%;border-collapse:collapse;font-size:15px}
+.bt-table th,.bt-table td{padding:13px 22px;text-align:left;border-bottom:1px solid var(--border)}
+.bt-table th{background:var(--surface-2);color:var(--mut);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.bt-table td.mono{font-family:'JetBrains Mono',monospace;color:var(--ink);font-weight:600}
+.bt-table tr:last-child td{border-bottom:none}
+.bt-table .highlight{background:#fef2f2}
+.bt-table .highlight td{color:var(--kill);font-weight:700}
+
+/* Roadmap */
+.roadmap{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:18px}
+.rm-step{padding:18px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;position:relative}
+.rm-step::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;border-radius:12px 0 0 12px}
+.rm-step[data-s="0"]::before{background:var(--scale)}
+.rm-step[data-s="1"]::before{background:var(--promote)}
+.rm-step[data-s="2"]::before{background:var(--maintain)}
+.rm-step[data-s="3"]::before{background:var(--observe)}
+.rm-step[data-s="4"]::before{background:#fbbf24}
+.rm-step[data-s="5"]::before{background:var(--mut-2)}
+.rm-step .week{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut);font-weight:700;letter-spacing:.1em}
+.rm-step h4{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--ink);margin:6px 0 4px;letter-spacing:-.01em}
+.rm-step p{font-size:11.5px;color:var(--mut);line-height:1.5}
+.rm-step .now{display:inline-block;font-size:9.5px;color:var(--scale);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:6px;padding:2px 8px;background:#ecfdf5;border-radius:4px}
+
+/* Phase 1 build */
+.build-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:20px}
+.build-card{padding:20px 18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;position:relative}
+.build-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--promote)}
+.build-card .day{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--promote);font-weight:700;letter-spacing:.14em}
+.build-card h4{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:800;color:var(--ink);margin:6px 0 6px;letter-spacing:-.01em}
+.build-card p{font-size:13px;color:var(--mut);line-height:1.5}
+.build-card .time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-2);margin-top:8px;background:var(--surface-2);padding:3px 8px;border-radius:5px;display:inline-block}
+
+/* Phases (the 4 lifecycle phases) */
+.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.phase-card{padding:22px 20px;border-radius:14px;background:var(--surface);border:1px solid var(--border);position:relative;overflow:hidden}
+.phase-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.phase-card[data-p="1"]::before{background:var(--observe)}
+.phase-card[data-p="2"]::before{background:var(--maintain)}
+.phase-card[data-p="3"]::before{background:var(--promote)}
+.phase-card[data-p="4"]::before{background:var(--scale)}
+.phase-card .ph-num{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mut);font-weight:700;letter-spacing:.12em}
+.phase-card h4{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;margin:6px 0 4px;letter-spacing:-.01em;color:var(--ink)}
+.phase-card .range{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mut);margin-bottom:12px}
+.phase-card .desc{font-size:13.5px;color:var(--ink-2);line-height:1.5;padding-top:10px;border-top:1px solid var(--border)}
+
+/* End slide */
+.slide.end{justify-content:center;align-items:stretch;background:linear-gradient(135deg,#fff,#f1f5f9);padding:5.5% 6.5%}
+.end-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:50px;align-items:center;width:100%;height:100%}
+.end-text{display:flex;flex-direction:column;justify-content:center}
+.end-video{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;background:#0f172a;box-shadow:0 20px 60px rgba(15,23,42,.18)}
+.end-video video{width:100%;height:100%;object-fit:cover;border-radius:18px;display:block}
+.slide.end .closer{font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,3.8vw,56px);font-weight:800;letter-spacing:-.03em;line-height:1.1;color:var(--ink);margin-bottom:24px}
+.slide.end .closer em{font-style:normal;color:var(--kill)}
+.slide.end .sub{font-size:17px;color:var(--mut);line-height:1.55}
+.slide.end .sub b{color:var(--ink);font-weight:600}
+.slide.end .tagline{margin-top:28px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:10px 18px;background:#fff;border:1px solid var(--border);border-radius:999px;display:inline-block;align-self:flex-start}
+.slide.end .stamp{position:absolute;bottom:26px;left:46px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mut);letter-spacing:.16em}
+
+@media print{
+  html,body{overflow:visible;height:auto;background:white}
+  .stage{position:relative;background:white}
+  .deck{box-shadow:none;border-radius:0;width:100%;height:auto}
+  .slide{position:relative;height:100vh;page-break-after:always;opacity:1;pointer-events:auto;break-inside:avoid}
+  .nav{display:none}
+}
+
+/* Start overlay */
+.start-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;color:white;transition:opacity .4s}
+.start-overlay.hidden{opacity:0;pointer-events:none}
+.start-overlay .card{text-align:center;max-width:680px;padding:50px 40px}
+.start-overlay h1{font-family:'Space Grotesk',sans-serif;font-size:84px;font-weight:900;letter-spacing:-.04em;line-height:.92;margin-bottom:14px}
+.start-overlay h1 .accent{color:#dc2626}
+.start-overlay .by{font-size:15px;color:#94a3b8;margin-bottom:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase}
+.start-overlay .duration{font-size:13px;color:#64748b;margin-bottom:42px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
+.start-overlay .start-btn{padding:18px 40px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;letter-spacing:.04em;box-shadow:0 12px 32px rgba(220,38,38,.4),0 0 0 1px rgba(255,255,255,.08) inset;font-family:'Inter',sans-serif;transition:transform .15s,box-shadow .15s}
+.start-overlay .start-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(220,38,38,.55),0 0 0 1px rgba(255,255,255,.12) inset}
+.start-overlay .start-btn:active{transform:translateY(0)}
+.start-overlay .hint{margin-top:28px;font-size:12px;color:#64748b;line-height:1.7;font-family:'Inter',sans-serif}
+.start-overlay .hint b{color:#94a3b8}
+.start-overlay .voice-pick{margin-top:18px;font-size:11.5px;color:#64748b}
+.start-overlay .voice-pick select{background:#1e293b;color:#cbd5e1;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:11.5px;margin-left:8px}
+
+/* Presenter HUD */
+.presenter-hud{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 14px;color:white;font-family:'JetBrains Mono',monospace;font-size:11.5px;z-index:90;display:none;align-items:center;gap:10px;letter-spacing:.06em}
+.presenter-hud.show{display:inline-flex}
+.presenter-hud .live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.presenter-hud button{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:14px;padding:0 4px}
+.presenter-hud button:hover{color:white}
+
+/* End card */
+.end-card{position:fixed;inset:0;background:rgba(15,23,42,.92);z-index:1500;display:none;align-items:center;justify-content:center;flex-direction:column;color:white}
+.end-card.show{display:flex}
+.end-card h2{font-family:'Space Grotesk',sans-serif;font-size:54px;font-weight:900;letter-spacing:-.03em;margin-bottom:14px}
+.end-card p{font-size:16px;color:#94a3b8;margin-bottom:32px;text-align:center}
+.end-card .restart-btn{padding:14px 32px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.04em}
+
+</style></head>
+<body>
+
+<div class="start-overlay" id="start-overlay">
+  <div class="card">
+    <div class="by">Genesis 2026 · Marketing</div>
+    <h1>Stop <span class="accent">Loss.</span></h1>
+    <div class="duration" style="margin-bottom:14px">~3:30 with voice-over · Presented by Zivon</div>
+    <div style="margin-bottom:32px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#94a3b8;letter-spacing:.1em;line-height:1.6"><b style="color:#cbd5e1">Team</b> · Sushant Sachan · Suyash Mishra</div>
+    <button class="start-btn" id="start-btn">▶ Start Presentation</button>
+    <div class="hint">Audio plays automatically · <b>Arrows</b> to navigate manually · <b>Esc</b> to skip</div>
+    <div class="voice-pick">Voice: <select id="voice-select"><option>Loading voices…</option></select></div>
+  </div>
+</div>
+
+<div class="presenter-hud" id="presenter-hud">
+  <span class="live-dot"></span>
+  <span id="hud-slide">SLIDE 01 / 13</span>
+  <span style="opacity:.4">·</span>
+  <button id="hud-pause" title="Pause / Resume">⏸</button>
+  <button id="hud-stop" title="Stop presentation">■</button>
+</div>
+
+<div class="end-card" id="end-card">
+  <h2>Thank you.</h2>
+  <p>Genesis 2026 · Stop Loss · Marketing · Growth</p>
+  <button class="restart-btn" id="restart-btn">↻ Restart Presentation</button>
+</div>
+
+
+<div class="stage"><div class="deck" id="deck">
+
+    <!-- 1. COVER -->
+  <section class="slide cover active" data-script="Hi, I'm Zivon. Today, marketing teams kill creatives by feel. Twenty-seven thousand rupees bleed out daily on ads we already know are failing. We taught the engine to think like a trading desk. Cut the losers in hours. Compound the winners. Learn from every trade. This is Stop Loss.">
+    <div class="cover-grid">
+      <div class="cover-text">
+        <div class="stamp"><span class="dot"></span> Genesis 2026 · Marketing · Growth</div>
+        <h1>Stop <span class="accent">Loss.</span></h1>
+        <p class="tagline">How we taught a marketing engine to think like a <b>trading desk</b> — cut the losers in hours, compound the winners, learn from every trade.</p>
+      </div>
+      <div class="cover-image">
+        <img src="stop_loss_mascot.png" alt="Stop Loss mascot — SpeakX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-fallback" style="display:none">
+          <div class="ic">🛡️</div>
+          <div>Save the mascot image as<br><b style="color:#cbd5e1;font-size:14px">stop_loss_mascot.png</b><br>in this folder to display here.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-stamp">A statistically-confident, agent-driven creative engine</div>
+    <div class="meta-right"><b>Marketing tool · Growth</b><br>Submission · Genesis 2026<br><br><b>Team</b><br>Sushant Sachan<br>Suyash Mishra</div>
+  </section>
+
+  <!-- 2. CURRENT PROCESS (5-stage manual) -->
+  <section class="slide" data-script="Here's how SpeakX runs creative today. Five stages. Brief the agencies. Review deliveries. Test on Meta for three to four days at two to three thousand rupees per ad. Promote winners. Manually pause the ads drifting above the four hundred rupee CAC benchmark. It works — but every step is manual, slow, and reactive.">
+    <div class="slide-tag">01 · Current Process</div>
+    <div class="slide-num">02 / 13</div>
+    <h2>Today, SpeakX runs <span class="hl">five manual stages.</span></h2>
+    <p class="lede">Every creative travels the same path — request, review, test, promote, optimize — before reaching main spend. It works. But every step is human-driven, slow, and reactive against a single ₹400 CAC benchmark.</p>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px;align-items:stretch">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 16px;position:relative">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:8px;background:#1b1410;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;font-family:'Space Grotesk',sans-serif">1</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626">Request</div></div>
+        <h4 style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink);letter-spacing:-.01em">Brief agencies</h4>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5">Volume per language + script per video. <i>e.g. 10 Hindi, 10 Kannada.</i></p>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:8px;background:#1b1410;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;font-family:'Space Grotesk',sans-serif">2</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626">Review</div></div>
+        <h4 style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink);letter-spacing:-.01em">Approve deliveries</h4>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5">Each video manually checked against its script. Approve matches.</p>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:8px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;font-family:'Space Grotesk',sans-serif">3</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626">Test</div></div>
+        <h4 style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink);letter-spacing:-.01em">Meta test campaign</h4>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5"><b>3-4 days</b> · <b>₹2-3k</b> per ad in a dedicated test campaign.</p>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:8px;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;font-family:'Space Grotesk',sans-serif">4</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626">Promote</div></div>
+        <h4 style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink);letter-spacing:-.01em">Winners to main</h4>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5">Top performers graduate to main campaigns on <b>Meta + Google</b>.</p>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:8px;background:#1b1410;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;font-family:'Space Grotesk',sans-serif">5</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#dc2626">Optimize</div></div>
+        <h4 style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink);letter-spacing:-.01em">Prune on CAC</h4>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5">Manually pause ads drifting above <b>₹400</b> benchmark.</p>
+      </div>
+    </div>
+    <div style="margin-top:18px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;background:linear-gradient(135deg,#13110E,#2A1C13);border-radius:14px;padding:18px 24px;color:#fff">
+      <div style="text-align:center;padding-right:24px;border-right:1px solid rgba(255,255,255,.14)">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:800;line-height:1;color:#fff"><span style="font-size:20px;vertical-align:top;color:#FF6A3D;margin-right:2px">₹</span>400</div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#C9BEB4;margin-top:6px">Avg Meta CAC</div>
+      </div>
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:3px">The benchmark we prune against</div>
+        <div style="font-size:13px;color:#E2D8CF">Step 5 reference point. Ads drifting meaningfully above ₹400 are candidates to pause. <b style="color:#FF8A5E">Decisions take days. Stop Loss takes hours.</b></div>
+      </div>
+    </div>
+    <div class="section-marker">PROBLEM SETUP</div>
+  </section>
+
+  <!-- 2. THE PROBLEM -->
+  <section class="slide" data-script="Here's the deeper problem. Plot cost-per-result against spend &mdash; the standard dashboard view &mdash; and the dots form these pretty curves. They look like trends. They are not. They are artifacts of dividing spend by an integer payment count. The view that would actually decide statistically does not exist in any dashboard SpeakX uses today.">
+    <div class="slide-tag">01 · The Problem</div>
+    <div class="slide-num">03 / 13</div>
+    <h2>The dashboards we have actually <span class="hl">mislead us.</span></h2>
+    <p class="lede">Plot <b>cost-per-result vs spend</b> — the standard chart — and the dots form pretty curves that look like performance patterns. <b>They are not.</b> They are mathematical artifacts of plotting <span class="mono" style="background:#f1f5f9;padding:2px 8px;border-radius:4px">spend ÷ N</span> against spend. Each "curve" is just one fixed integer payment count.</p>
+    <svg id="problem-broken-scatter" viewBox="0 0 1500 500" style="width:100%;max-height:54%;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px"></svg>
+    <div class="section-marker">PROBLEM</div>
+  </section>
+
+  <!-- 3. THE MATH -->
+  <section class="slide" data-script="We borrowed the math from trading desks. Act on belief, not observation. Use Poisson confidence intervals. Are we ninety-five percent sure this creative's true cost exceeds the kill threshold? If yes, kill. If no, wait.">
+    <div class="slide-tag">02 · The Maths Behind It</div>
+    <div class="slide-num">04 / 13</div>
+    <h2>Act on <span class="hg">belief</span>, not observation.</h2>
+    <p class="lede">A creative's observed CAC at low N is noisy. The Poisson upper-confidence interval narrows as payments accumulate. <b>Kill only when the posterior belief — not the noisy observation — clears the threshold with 95% confidence.</b></p>
+    <div style="display:flex;gap:36px;align-items:center;margin-top:8px">
+      <div class="formula-box" style="flex:1.1">
+        <div class="formula-line"><b>Posterior</b> = Prior × Likelihood</div>
+        <div class="formula-arrow">↓ updated every 6 hours ↓</div>
+        <div class="formula-line"><b>P</b>(true CAC > ₹802 | data)  ≥  <b>0.95</b>  →  KILL</div>
+        <div class="note">The same math a trading desk uses for stop-loss orders — applied to ad spend.</div>
+      </div>
+      <div class="bt-table" style="flex:1">
+        <table>
+          <thead><tr><th>Payments N</th><th>Kill if spend ≥</th><th>Confidence</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">0</td><td class="mono">₹1,849</td><td>HIGH · auto</td></tr>
+            <tr><td class="mono">1</td><td class="mono">₹4,467</td><td>MED · queue</td></tr>
+            <tr><td class="mono">3</td><td class="mono">₹7,034</td><td>MED · queue</td></tr>
+            <tr><td class="mono">6</td><td class="mono">₹10,474</td><td>HIGH · auto</td></tr>
+            <tr><td class="mono">10</td><td class="mono">₹14,749</td><td>HIGH · auto</td></tr>
+            <tr><td class="mono">20</td><td class="mono">₹24,774</td><td>HIGH · auto</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section-marker">MATHS</div>
+  </section>
+
+  <!-- 4. BAYESIAN SEQUENTIAL · Worked Example -->
+  <section class="slide" data-script="Bayesian sequential testing updates our belief every six hours. Look at the example. At hour six, thirty-two percent sure. At eighteen hours, seventy-one percent. At twenty-four hours, ninety-six percent — we kill. Same statistical confidence as a fourteen-day fixed test. Thirteen days faster.">
+    <div class="slide-tag">02 · Bayesian Sequential</div>
+    <div class="slide-num">05 / 13</div>
+    <h2><span class="hg">Bayesian sequential</span> — belief tightens with every tick.</h2>
+    <p class="lede"><b>Bayesian sequential testing</b> updates the posterior belief about a creative's true CAC every 6 hours as new data arrives. <b>Stop the moment confidence crosses 95%</b> — for either kill OR futility. No fixed windows. No waiting two weeks for an A/B test to "complete."</p>
+    <div style="display:grid;grid-template-columns:0.95fr 1.25fr;gap:24px;flex:1;min-height:0">
+      <!-- Visual: posterior narrowing -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">Posterior belief over time</div>
+        <div style="font-size:11.5px;color:var(--mut);margin-bottom:10px">Each curve = belief about true CAC after N more payments observed.</div>
+        <svg id="bayes-svg" viewBox="0 0 460 290" style="width:100%;flex:1"></svg>
+        <div style="display:flex;gap:14px;font-size:10.5px;color:var(--ink-2);margin-top:6px;justify-content:space-around">
+          <span><span style="display:inline-block;width:10px;height:3px;background:#cbd5e1;vertical-align:middle;margin-right:4px"></span>tick 1 · N=1</span>
+          <span><span style="display:inline-block;width:10px;height:3px;background:#94a3b8;vertical-align:middle;margin-right:4px"></span>tick 2 · N=3</span>
+          <span><span style="display:inline-block;width:10px;height:3px;background:#2563eb;vertical-align:middle;margin-right:4px"></span>tick 3 · N=8</span>
+          <span><span style="display:inline-block;width:10px;height:3px;background:#dc2626;vertical-align:middle;margin-right:4px"></span>tick 4 · N=15</span>
+        </div>
+      </div>
+      <!-- Worked example -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">Worked example · one creative</div>
+        <div style="font-size:11.5px;color:var(--mut);margin-bottom:10px">Kill threshold: m ≥ 1.6 (₹802). Each row is one 6-hour data tick.</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:9px 10px;background:#f8fafc;font-size:10.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">Tick</th>
+              <th style="text-align:right;padding:9px 10px;background:#f8fafc;font-size:10.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">Spend</th>
+              <th style="text-align:right;padding:9px 10px;background:#f8fafc;font-size:10.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">Pmts</th>
+              <th style="text-align:right;padding:9px 10px;background:#f8fafc;font-size:10.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">Obs CAC</th>
+              <th style="text-align:right;padding:9px 10px;background:#f8fafc;font-size:10.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">P(true > kill)</th>
+              <th style="text-align:right;padding:9px 10px;background:#f8fafc;font-size:10.5px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:9px 10px;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">+6h</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">₹500</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">1</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">₹500</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;color:#64748b;border-bottom:1px solid #f1f5f9">32%</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:700;color:#64748b;border-bottom:1px solid #f1f5f9">continue</td></tr>
+            <tr><td style="padding:9px 10px;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">+12h</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">₹1,200</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">2</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">₹600</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;color:#64748b;border-bottom:1px solid #f1f5f9">45%</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:700;color:#64748b;border-bottom:1px solid #f1f5f9">continue</td></tr>
+            <tr><td style="padding:9px 10px;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">+18h</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">₹2,800</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">3</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;border-bottom:1px solid #f1f5f9">₹933</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;color:#d97706;border-bottom:1px solid #f1f5f9">71%</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:700;color:#d97706;border-bottom:1px solid #f1f5f9">continue</td></tr>
+            <tr style="background:#fef2f2"><td style="padding:9px 10px;font-family:JetBrains Mono,monospace;font-weight:700;color:#dc2626">+24h</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:700;color:#dc2626">₹4,500</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:700;color:#dc2626">4</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:700;color:#dc2626">₹1,125</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:800;color:#dc2626">96%</td><td style="padding:9px 10px;text-align:right;font-family:JetBrains Mono,monospace;font-weight:800;color:#dc2626">KILL</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px;padding:11px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:12.5px;color:#7f1d1d;line-height:1.5">
+          <b>The same creative under a frequentist test</b> would keep running another <b>13 days</b> waiting for the sample to "complete." Stop Loss kills it at hour 24 — same statistical confidence, 13 days faster.
+        </div>
+      </div>
+    </div>
+    <div class="section-marker">MATHS</div>
+  </section>
+
+  <!-- 6. DECISION MATRIX · × peer vs payments -->
+  <section class="slide" data-script="And this is the view Stop Loss produces every day. X axis: payments — that's confidence. Y axis: m — that's severity. Top right is the kill zone — high cost AND high confidence. Bottom right is the scale zone. Low-N ads sit on the left — Stop Loss waits for them to mature before deciding.">
+    <div class="slide-tag">03 · Proposed Solution · The View</div>
+    <div class="slide-num">06 / 13</div>
+    <h2>The visualization that <span class="hg">actually decides</span> — m vs payments.</h2>
+    <p class="lede">X axis = <b>payments N (confidence)</b>. Y axis = <b>m (severity, × peer)</b>. The kill zone is the top-right — high CAC AND statistical confidence. Low-N ads sit on the left "needs more data" stripe and are never auto-killed.</p>
+    <svg id="decision-matrix" viewBox="0 0 1500 480" style="width:100%;max-height:56%;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px"></svg>
+    <div class="section-marker">PROPOSED SOLUTION</div>
+  </section>
+
+  <!-- 5. THE DECISION TREE -->
+  <section class="slide" data-script="Every creative walks exactly one path. Classified by spend. Walks down its phase column. The first yes branch fires the action. No judgment calls. Four phases — test, validate, decide, scale — every creative, every time.">
+    <div class="slide-tag">06 · The Build</div>
+    <div class="slide-num">07 / 13</div>
+    <h2>Every creative walks <span class="hb">exactly one path.</span></h2>
+    <p class="lede">Classified by cumulative spend → walks down its phase column → first YES branch fires the action. <b>No judgment calls. No meetings. No politics.</b></p>
+    <svg id="tree-svg" viewBox="0 0 1400 560" style="width:100%;max-height:62%;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px"></svg>
+    <div class="section-marker">SOLUTION</div>
+  </section>
+
+  <!-- 6. SIMULATION VALIDATION -->
+  <section class="slide" data-script="Move the sliders. Watch the trade-off live. The confusion matrix updates as you tune. Click find optimal, and the algorithm sweeps thresholds to find the one that minimizes cost per winner.">
+    <div class="slide-tag">04 · Validation · Simulation</div>
+    <div class="slide-num">08 / 13</div>
+    <h2>Tune the algorithm. <span class="hb">See the trade-off live.</span></h2>
+    <p class="lede" style="margin-bottom:14px">Move sliders. Watch the confusion matrix and KPIs react. Click <b>Find optimal</b> — the algorithm sweeps thresholds and snaps the slider to the one that minimizes cost per winner.</p>
+    <div style="display:grid;grid-template-columns:280px 1fr 0.85fr;gap:18px;flex:1;min-height:0">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:14px">Population & Threshold</div>
+        <div style="margin-bottom:14px">
+          <label style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:4px">Sample size <b id="sim-lbl-n" class="mono" style="color:var(--ink)">800</b></label>
+          <input type="range" id="sim-n" min="200" max="2000" step="100" value="800" style="width:100%">
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:4px">True CPR median <b id="sim-lbl-cpr" class="mono" style="color:var(--ink)">₹500</b></label>
+          <input type="range" id="sim-cpr" min="300" max="1000" step="20" value="500" style="width:100%">
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:4px">Spread σ <b id="sim-lbl-sigma" class="mono" style="color:var(--ink)">0.55</b></label>
+          <input type="range" id="sim-sigma" min="0.3" max="1.0" step="0.05" value="0.55" style="width:100%">
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:4px">Kill threshold <b id="sim-lbl-kt" class="mono" style="color:var(--ink)">1.6×</b></label>
+          <input type="range" id="sim-kt" min="1.2" max="2.4" step="0.1" value="1.6" style="width:100%">
+        </div>
+        <button id="sim-optimize" style="width:100%;padding:10px 12px;background:#0f172a;color:white;border:none;border-radius:8px;font-size:12.5px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">⚡ Find optimal threshold</button>
+        <div id="sim-summary" style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;color:var(--ink-2);line-height:1.55;margin-top:10px"></div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;min-width:0">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:10px">Confusion Matrix</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:8px">Rows: algorithm action · Columns: ground truth</div>
+        <div id="sim-matrix" style="display:grid;grid-template-columns:90px 1fr 1fr 1fr;gap:4px;font-size:11px"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div id="sim-kpi-precision" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;flex:1;display:flex;flex-direction:column;justify-content:center"></div>
+        <div id="sim-kpi-recall" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;flex:1;display:flex;flex-direction:column;justify-content:center"></div>
+        <div id="sim-kpi-scalep" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;flex:1;display:flex;flex-direction:column;justify-content:center"></div>
+      </div>
+    </div>
+    <div class="section-marker">VALIDATION</div>
+  </section>
+
+  <!-- 7. BACKTEST VALIDATION -->
+  <section class="slide" data-script="We backtested against ten point six crore of real spend. Six months. Twenty-one campaigns. The kill ladder would have reclaimed one point five nine crore — fifteen percent of total spend. Zero false kills. The headline catch: one campaign ran for one hundred ninety-one days at thirty times peer cost. Nobody stopped it. Our algorithm would have caught it on day seven.">
+    <div class="slide-tag">04 · Validation · Backtest</div>
+    <div class="slide-num">09 / 13</div>
+    <h2>Backtested on <span class="hl">₹10.6 Cr</span> of real spend.</h2>
+    <p class="lede">6 months of historical data. 21 campaigns. 2,401 daily observations. Walked each campaign day-by-day applying the kill ladder. Compared to what actually happened.</p>
+    <div class="stat-row three">
+      <div class="stat-card scale"><div class="stat-lbl">Reclaimable Spend</div><div class="stat-big">₹1.59 Cr</div><div class="stat-sub">14.9% of total · ₹26.5L/month</div></div>
+      <div class="stat-card scale"><div class="stat-lbl">False Kills</div><div class="stat-big">0</div><div class="stat-sub">on the actual SpeakX distribution</div></div>
+      <div class="stat-card promote"><div class="stat-lbl">Headline Catch</div><div class="stat-big">30×</div><div class="stat-sub">RT - Camp at ₹19,004 CAC, killed at day ~7</div></div>
+    </div>
+    <p class="lede" style="margin-top:22px;font-size:18px"><b>RT - Camp ran for 191 days at 30× peer CAC.</b> Someone owned it. Someone reviewed it. Nobody stopped it. The kill ladder would have caught it on day 7. <b>That's the cultural shift.</b></p>
+    <div class="section-marker">VALIDATION</div>
+  </section>
+
+  <!-- 8. IMPACT -->
+  <section class="slide" data-script="What changes when it ships. Two lakh investment yields two and a half to three and a half crore year-one returns. Roughly one hundred times R O I. Phase one captures sixty percent of this — before any automation kicks in.">
+    <div class="slide-tag">05 · Impact</div>
+    <div class="slide-num">10 / 13</div>
+    <h2>What changes <span class="hg">when it ships.</span></h2>
+    <p class="lede"><b>₹2L investment yields ₹2.5-3.5 Cr year-1 returns — that's ~100× ROI.</b> Claude does the build, humans operate it manually for two weeks, then auto-execute kicks in. Phase 1 alone captures 60% of year-1 value before any automation runs.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">
+      <div class="stat-card scale"><div class="stat-lbl">Year-1 Investment</div><div class="stat-big">₹2L</div><div class="stat-sub">Build + 12-month run-rate</div></div>
+      <div class="stat-card scale"><div class="stat-lbl">Year-1 Returns</div><div class="stat-big">₹2.5-3.5 Cr</div><div class="stat-sub">Reclaim from kills + scale gains</div></div>
+      <div class="stat-card gold"><div class="stat-lbl">Year-1 ROI</div><div class="stat-big">~100×</div><div class="stat-sub">Phase 1 captures 60% of this</div></div>
+    </div>
+    <div class="bt-table" style="margin-top:0">
+      <table>
+        <thead><tr><th>Metric</th><th>Before</th><th>After Phase 1</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td><b>Kill latency</b></td><td class="mono">7-14 days</td><td class="mono" style="color:var(--scale)">6 hours</td><td>30-50× faster execution on confident decisions</td></tr>
+          <tr><td><b>Monthly reclaim</b></td><td class="mono">~₹0</td><td class="mono" style="color:var(--scale)">₹20-26 L</td><td>Direct: caught at campaign envelope first, ad-level next</td></tr>
+          <tr><td><b>False kill rate</b></td><td class="mono">unknown</td><td class="mono" style="color:var(--scale)">0% (backtest)</td><td>Bayesian gate prevents acting on noise</td></tr>
+          <tr><td><b>Cost to build</b></td><td class="mono">—</td><td class="mono" style="color:var(--scale)">~₹2L year 1</td><td>Claude-driven · 1 analyst · 5 days</td></tr>
+        </tbody>
+        <tfoot>
+          <tr class="highlight"><td><b>Year-1 ROI · headline</b></td><td class="mono">—</td><td class="mono" style="font-size:17px">~100×</td><td><b>₹2L in → ₹2.5–3.5 Cr out</b></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="section-marker">IMPACT</div>
+  </section>
+
+  <!-- 4. PHASE 1 SOLUTION -->
+  <section class="slide" data-script="So how do we actually ship this? Phase one is one week. A Python script. A Slack delivery loop. Manual execution by one analyst. Built with Claude in five days. No engineering team. No infrastructure. Phase one alone captures sixty percent of that hundred-times R O I — before any automation.">
+    <div class="slide-tag">03 · Proposed Solution</div>
+    <div class="slide-num">11 / 13</div>
+    <h2>So how do we <span class="hb">actually ship this?</span></h2>
+    <p class="lede"><b>Phase 1 is the minimal viable kill switch.</b> Python script + Slack delivery + manual execution. Built with Claude in 4-5 days. No engineering team. No infrastructure procurement. Captures <b>60% of that 100× year-1 ROI</b> before any automation kicks in.</p>
+    <div class="build-grid">
+      <div class="build-card"><div class="day">DAY 1</div><h4>Data Pipeline</h4><p>Pull campaign data from Zivon daily. Compute m, fatigue, kill ladder per campaign.</p><div class="time">~4 hours</div></div>
+      <div class="build-card"><div class="day">DAY 2</div><h4>Decision Engine</h4><p>Kill ladder logic (Poisson 95% CI). Tag KILL / SCALE / MAINTAIN / OBSERVE with reasoning.</p><div class="time">~3 hours</div></div>
+      <div class="build-card"><div class="day">DAY 3</div><h4>Slack Delivery</h4><p>Daily 9am message: kill list, scale candidates, anomaly flags — scannable in 30 seconds.</p><div class="time">~2 hours</div></div>
+      <div class="build-card"><div class="day">DAY 4</div><h4>Execution Log</h4><p>CSV / sheet tracking what was executed, skipped, overridden — training data for Phase 2.</p><div class="time">~2 hours</div></div>
+      <div class="build-card"><div class="day">DAY 5</div><h4>Calibration</h4><p>Run live. Walk through with one campaign owner. Refine. Ship to all owners by EOD.</p><div class="time">~1 day</div></div>
+    </div>
+    <div class="two-col" style="margin-top:24px">
+      <div class="col"><h3 style="color:var(--mut)">What it does NOT include</h3><p style="color:var(--mut)">Six-agent architecture · auto-execution · A/B testing framework · Memory Agent · cross-platform Google Ads. <b>All deferred to later phases — see roadmap.</b></p></div>
+      <div class="col"><h3 style="color:var(--scale)">What you get on Day 5</h3><p>An honest daily kill list backed by 95% Poisson confidence intervals, surfacing the RT - Camp class of disasters before they happen again.</p></div>
+    </div>
+    <div class="section-marker">SOLUTION</div>
+  </section>
+
+  <!-- 9. ROADMAP -->
+  <section class="slide" data-script="Phase one ships in week one. Each next phase is one to two weeks of Claude-assisted build. The full six-agent system is the destination, not the start. We earn the right to automate by proving the math works at each phase.">
+    <div class="slide-tag">07 · Roadmap</div>
+    <div class="slide-num">12 / 13</div>
+    <h2>Phase 1 ships in 1 week. <span class="hb">Full system in 16.</span></h2>
+    <p class="lede">Each phase is 1-2 weeks of Claude-assisted build. Value compounds. <b>Add the next phase only when the current one's value plateaus.</b></p>
+    <div class="roadmap">
+      <div class="rm-step" data-s="0"><div class="week">WEEK 1</div><h4>Phase 1 · Visibility</h4><p>Hex dashboard + daily Slack alerts. Humans execute via Zivon UI.</p><div class="now">SHIPS NOW</div></div>
+      <div class="rm-step" data-s="1"><div class="week">WEEK 3-4</div><h4>Phase 2 · Auto-Kill</h4><p>HIGH-confidence kills auto-execute via Zivon API. False kill = cheap.</p></div>
+      <div class="rm-step" data-s="2"><div class="week">MONTH 2</div><h4>Phase 3 · Ad-Level</h4><p>Per-creative decisions instead of per-campaign. Needs ad-level data.</p></div>
+      <div class="rm-step" data-s="3"><div class="week">MONTH 3-4</div><h4>Phase 4 · Stall Detector</h4><p>6-hourly anomaly detection. Bayesian sequential A/B testing.</p></div>
+      <div class="rm-step" data-s="4"><div class="week">MONTH 4+</div><h4>Phase 5 · Learning Loop</h4><p>Memory Agent weekly replay. Auto-tunes thresholds per cohort.</p></div>
+      <div class="rm-step" data-s="5"><div class="week">FUTURE</div><h4>Six-Agent System</h4><p>Diagnostic · Decision · Experiment · Brief · Memory · Conductor.</p></div>
+    </div>
+    <p class="lede" style="margin-top:24px;font-size:17px">The original 6-agent architecture is the <b>destination</b>, not the starting point. We earn the right to automate by proving the math works at each phase.</p>
+    <div class="section-marker">ROADMAP</div>
+  </section>
+
+  <!-- 10. CLOSE -->
+  <section class="slide end" data-script="Stop Loss exists to bridge the gap between what you see, and what's true. Act on belief. Not observation.">
+    <div class="slide-tag">Closing</div>
+    <div class="slide-num">13 / 13</div>
+    <div class="end-grid">
+      <div class="end-text">
+        <div class="closer">Stop Loss exists to bridge the gap between <em>what you see</em> and <em>what's true.</em></div>
+        <p class="sub">Observed CAC lies when N is small. The posterior belief — updated every six hours, acted on at 95% confidence — is the only honest number. <b>The whole framework is plumbing around that one idea.</b></p>
+        <div class="tagline">act on belief · not observation</div>
+      </div>
+      <div class="end-video">
+        <video id="close-video" src="yes_do_it.mp4" playsinline preload="auto" controls></video>
+      </div>
+    </div>
+    <div class="stamp">Genesis 2026 · Stop Loss · Marketing · Growth<br><span style="color:#cbd5e1;font-weight:600">Team: Sushant Sachan · Suyash Mishra</span></div>
+  </section>
+
+</div></div>
+
+<div class="nav">
+  <button id="prev">←</button>
+  <span class="pos" id="pos">01 / 13</span>
+  <button id="next">→</button>
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+// ============== NAV ==============
+const slides = document.querySelectorAll('.slide');
+const dots = document.getElementById('dots');
+const pos = document.getElementById('pos');
+let current = 0;
+slides.forEach((s, i) => {
+  const d = document.createElement('span');
+  d.className = 'd' + (i === 0 ? ' active' : '');
+  d.addEventListener('click', () => go(i));
+  dots.appendChild(d);
+});
+function go(i) {
+  if (i < 0 || i >= slides.length) return;
+  slides[current].classList.remove('active');
+  document.querySelectorAll('.dots .d')[current].classList.remove('active');
+  current = i;
+  slides[current].classList.add('active');
+  document.querySelectorAll('.dots .d')[current].classList.add('active');
+  pos.textContent = String(current+1).padStart(2,'0') + ' / ' + String(slides.length).padStart(2,'0');
+}
+document.getElementById('next').addEventListener('click', () => go(current+1));
+document.getElementById('prev').addEventListener('click', () => go(current-1));
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(current+1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); go(current-1); }
+  if (e.key === 'Home') go(0);
+  if (e.key === 'End') go(slides.length-1);
+});
+
+// Replay video when last slide is shown
+const closeVideo = document.getElementById('close-video');
+if (closeVideo) {
+  const origGo = go;
+  // wrap go to replay video on slide 10
+  window._wrapGoForVideo = true;
+}
+function replayCloseVideoIfShown() {
+  if (slides[current] && slides[current].classList.contains('end')) {
+    const v = document.getElementById('close-video');
+    if (v) {
+      try {
+        v.muted = false;        // ensure audio plays
+        v.volume = 1.0;
+        v.currentTime = 0;
+        const p = v.play();
+        if (p && p.catch) {
+          p.catch(() => {
+            // Browser blocked autoplay with sound — fall back to muted autoplay
+            v.muted = true;
+            v.play().catch(() => {});
+          });
+        }
+      } catch(e) {}
+    }
+  }
+}
+// Hook into nav buttons
+document.getElementById('next').addEventListener('click', replayCloseVideoIfShown);
+document.getElementById('prev').addEventListener('click', replayCloseVideoIfShown);
+document.querySelectorAll('.dots .d').forEach(d => d.addEventListener('click', replayCloseVideoIfShown));
+document.addEventListener('keydown', replayCloseVideoIfShown);
+
+// ============== HELPERS ==============
+function svgEl(parent, tag, attrs, text) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+
+// ============== PROBLEM MATRIX (slide 2) ==============
+(function() {
+  const svg = document.getElementById('problem-matrix');
+  if (!svg) return;
+  const W = 1500, H = 500, pad = {l: 90, r: 200, t: 40, b: 60};
+  const xLo = Math.log10(1), xHi = Math.log10(300);
+  const xMap = n => pad.l + (Math.log10(Math.max(1, Math.min(300, n))) - xLo) / (xHi - xLo) * (W - pad.l - pad.r);
+  const yMax = 3.5;
+  const yMap = m => pad.t + (1 - Math.min(m, yMax) / yMax) * (H - pad.t - pad.b);
+
+  svgEl(svg, 'rect', {x: xMap(20), y: yMap(yMax), width: xMap(300) - xMap(20), height: yMap(1.6) - yMap(yMax), fill: '#dc2626', 'fill-opacity': 0.07});
+  svgEl(svg, 'rect', {x: xMap(15), y: yMap(1.0), width: xMap(300) - xMap(15), height: yMap(0) - yMap(1.0), fill: '#059669', 'fill-opacity': 0.05});
+
+  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach(v => {
+    const y = yMap(v);
+    svgEl(svg, 'line', {x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: '#e2e8f0', 'stroke-width': 1});
+    svgEl(svg, 'text', {x: pad.l - 10, y: y, 'text-anchor':'end', 'font-size':13, fill:'#64748b', 'font-family':'JetBrains Mono,monospace', 'dominant-baseline':'middle'}, v.toFixed(1) + '×');
+  });
+  [1, 3, 10, 30, 100, 300].forEach(n => {
+    const x = xMap(n);
+    svgEl(svg, 'line', {x1: x, y1: pad.t, x2: x, y2: H - pad.b, stroke: '#e2e8f0'});
+    svgEl(svg, 'text', {x, y: H - pad.b + 24, 'text-anchor':'middle', 'font-size':13, fill:'#64748b', 'font-family':'JetBrains Mono,monospace'}, 'N=' + n);
+  });
+  svgEl(svg, 'line', {x1: pad.l, y1: yMap(1), x2: W - pad.r, y2: yMap(1), stroke:'#34d6c8', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  svgEl(svg, 'text', {x: pad.l + 10, y: yMap(1) - 8, fill:'#059669', 'font-size':12, 'font-weight':700}, 'peer benchmark (m=1.0)');
+  svgEl(svg, 'line', {x1: pad.l, y1: yMap(1.6), x2: W - pad.r, y2: yMap(1.6), stroke:'#dc2626', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  svgEl(svg, 'text', {x: pad.l + 10, y: yMap(1.6) - 8, fill:'#dc2626', 'font-size':12, 'font-weight':700}, 'kill threshold (m=1.6)');
+  svgEl(svg, 'line', {x1: xMap(20), y1: pad.t, x2: xMap(20), y2: H - pad.b, stroke:'#7c6cff', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  svgEl(svg, 'text', {x: xMap(20) + 8, y: pad.t + 16, fill:'#7c6cff', 'font-size':12, 'font-weight':700}, 'N≥20 confidence floor');
+
+  svgEl(svg, 'text', {x: (xMap(20) + W - pad.r)/2, y: pad.t + 36, 'text-anchor':'middle', 'font-size':16, 'font-weight':800, fill:'#dc2626', 'letter-spacing':'.2em'}, 'KILL ZONE');
+  svgEl(svg, 'text', {x: (pad.l + xMap(20))/2, y: pad.t + 36, 'text-anchor':'middle', 'font-size':14, 'font-weight':700, fill:'#94a3b8', 'letter-spacing':'.18em'}, 'NEEDS MORE DATA');
+  svgEl(svg, 'text', {x: (xMap(15) + W - pad.r)/2, y: H - pad.b - 18, 'text-anchor':'middle', 'font-size':16, 'font-weight':800, fill:'#059669', 'letter-spacing':'.2em'}, 'SCALE ZONE');
+  svgEl(svg, 'text', {x: W - pad.r, y: H - 16, 'text-anchor':'end', 'font-size':12, fill:'#64748b', 'font-style':'italic'}, 'payments N (log scale) →');
+  svgEl(svg, 'text', {x: pad.l - 60, y: pad.t + 16, 'font-size':12, fill:'#64748b', 'font-style':'italic'}, '↑ × peer');
+
+  function rand(a,b){return a+Math.random()*(b-a)}
+  function logRand(a,b){return Math.exp(rand(Math.log(a),Math.log(b)))}
+  const colors = {KILL:'#dc2626', WATCH:'#d97706', KEEP:'#059669', INSUFF:'#94a3b8'};
+  const dots = [];
+  for (let i = 0; i < 8; i++) dots.push({n: Math.round(logRand(25, 220)), m: rand(1.7, 2.9), v:'KILL', s: rand(9, 22)});
+  for (let i = 0; i < 16; i++) dots.push({n: Math.round(logRand(8, 70)), m: rand(1.0, 1.6), v:'WATCH', s: rand(7, 15)});
+  for (let i = 0; i < 26; i++) dots.push({n: Math.round(logRand(15, 280)), m: rand(0.35, 1.0), v:'KEEP', s: rand(8, 24)});
+  for (let i = 0; i < 28; i++) dots.push({n: Math.round(logRand(1, 8)), m: rand(0.2, 2.8), v:'INSUFF', s: rand(5, 9)});
+  dots.forEach(d => {
+    svgEl(svg, 'circle', {cx: xMap(d.n), cy: yMap(d.m), r: d.s/2, fill: colors[d.v], 'fill-opacity': 0.55, stroke: colors[d.v], 'stroke-opacity': 0.85, 'stroke-width': 1});
+  });
+  // Legend (right side, vertical)
+  const lx = W - pad.r + 30;
+  const legItems = [{c:'#dc2626', l:'STOP NOW'}, {c:'#d97706', l:'WATCH'}, {c:'#059669', l:'KEEP'}, {c:'#94a3b8', l:'INSUFFICIENT'}];
+  legItems.forEach((li, i) => {
+    svgEl(svg, 'circle', {cx: lx, cy: pad.t + 70 + i*26, r: 6, fill: li.c, 'fill-opacity': 0.7});
+    svgEl(svg, 'text', {x: lx + 14, y: pad.t + 70 + i*26, 'font-size':12.5, fill:'#334155', 'dominant-baseline':'middle', 'font-weight':500}, li.l);
+  });
+})();
+
+// ============== DECISION TREE (slide 5) ==============
+(function() {
+  const svg = document.getElementById('tree-svg');
+  if (!svg) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const defs = svgEl(svg, 'defs', {});
+  [['yes','#059669'],['no','#94a3b8'],['flow','#94a3b8']].forEach(([id,col]) => {
+    const m = document.createElementNS(NS,'marker');
+    m.setAttribute('id', 'arr-tree-'+id);
+    m.setAttribute('viewBox', '0 0 10 10');
+    m.setAttribute('refX', 8); m.setAttribute('refY', 5);
+    m.setAttribute('markerWidth', 6); m.setAttribute('markerHeight', 6);
+    m.setAttribute('orient', 'auto');
+    const p = document.createElementNS(NS,'path');
+    p.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+    p.setAttribute('fill', col);
+    m.appendChild(p); defs.appendChild(m);
+  });
+  function decision(cx, y, w, h, l1, l2) {
+    svgEl(svg, 'rect', {x: cx-w/2, y, width: w, height: h, rx: 9, ry: 9, fill: '#f1f5f9', stroke: '#94a3b8', 'stroke-width': 1.5});
+    if (l2) {
+      svgEl(svg, 'text', {x: cx, y: y+h/2-8, 'text-anchor':'middle', 'font-size':13, fill:'#0f172a', 'font-weight':500, 'dominant-baseline':'middle'}, l1);
+      svgEl(svg, 'text', {x: cx, y: y+h/2+10, 'text-anchor':'middle', 'font-size':12, fill:'#64748b', 'font-weight':500, 'dominant-baseline':'middle'}, l2);
+    } else {
+      svgEl(svg, 'text', {x: cx, y: y+h/2, 'text-anchor':'middle', 'font-size':13, fill:'#0f172a', 'font-weight':500, 'dominant-baseline':'middle'}, l1);
+    }
+  }
+  function action(cx, cy, w, h, type, label, sub) {
+    const colors = {KILL:['#dc2626','#991b1b'], SCALE:['#059669','#047857'], PROMOTE:['#2563eb','#1e40af'], MAINTAIN:['#d97706','#b45309'], HOLD:['#92400e','#78350f'], CONTINUE:['#64748b','#475569']};
+    const [fill, stroke] = colors[type];
+    svgEl(svg, 'rect', {x: cx-w/2, y: cy-h/2, width: w, height: h, rx: 7, ry: 7, fill, stroke, 'stroke-width': 1});
+    if (sub) {
+      svgEl(svg, 'text', {x: cx, y: cy-7, 'text-anchor':'middle', 'font-size':12, fill:'white', 'font-weight':700, 'letter-spacing':'.04em', 'dominant-baseline':'middle'}, label);
+      svgEl(svg, 'text', {x: cx, y: cy+9, 'text-anchor':'middle', 'font-size':10.5, fill:'rgba(255,255,255,.85)', 'font-weight':500, 'dominant-baseline':'middle'}, sub);
+    } else {
+      svgEl(svg, 'text', {x: cx, y: cy, 'text-anchor':'middle', 'font-size':12, fill:'white', 'font-weight':700, 'dominant-baseline':'middle'}, label);
+    }
+  }
+  function phaseHdr(cx, y, w, h, code, name, range, num) {
+    const colors = {1:['#f5f3ff','#7c6cff'], 2:['#fffbeb','#d97706'], 3:['#eff6ff','#2563eb'], 4:['#ecfdf5','#059669']};
+    const [bg, sc] = colors[num];
+    svgEl(svg, 'rect', {x: cx-w/2, y, width: w, height: h, rx: 9, ry: 9, fill: bg, stroke: sc, 'stroke-width': 1.5});
+    svgEl(svg, 'text', {x: cx, y: y+14, 'text-anchor':'middle', 'font-size':11, fill:'#64748b', 'font-weight':600, 'letter-spacing':'.08em', 'font-family':'JetBrains Mono,monospace', 'dominant-baseline':'middle'}, code);
+    svgEl(svg, 'text', {x: cx, y: y+34, 'text-anchor':'middle', 'font-size':18, fill:'#0f172a', 'font-weight':700, 'dominant-baseline':'middle'}, name);
+    svgEl(svg, 'text', {x: cx, y: y+52, 'text-anchor':'middle', 'font-size':11.5, fill:'#334155', 'font-weight':600, 'font-family':'JetBrains Mono,monospace', 'dominant-baseline':'middle'}, range);
+  }
+  function line(x1, y1, x2, y2, kind) {
+    svgEl(svg, 'path', {d: `M ${x1} ${y1} L ${x2} ${y2}`, fill:'none', stroke: kind==='yes'?'#059669':'#94a3b8', 'stroke-width': kind==='yes'?2:1.5, 'stroke-dasharray': kind==='no'?'4 3':'none', 'marker-end':`url(#arr-tree-${kind})`});
+  }
+  function branch(x, y, label, isYes) {
+    svgEl(svg, 'text', {x, y, 'text-anchor':'middle', 'font-size':11, 'font-weight':700, 'font-family':'JetBrains Mono,monospace', fill: isYes?'#059669':'#64748b', 'dominant-baseline':'middle'}, label);
+  }
+  const decW = 240, decH = 54, actW = 160, actH = 44, gapV = 18;
+  const cols = {L: {decX: 260, actX: 260 + decW/2 + 28 + actW/2}, R: {decX: 960, actX: 960 + decW/2 + 28 + actW/2}};
+  const rows = {TOP: 10, BOT: 310};
+  function renderPhase(col, row, num, code, name, range, decisions, terminal) {
+    const cx = col.decX, actX = col.actX;
+    let y = row;
+    phaseHdr(cx, y, decW, 64, code, name, range, num);
+    y += 64;
+    decisions.forEach((d, i) => {
+      line(cx, y, cx, y+gapV, 'flow');
+      y += gapV;
+      decision(cx, y, decW, decH, d.line1, d.line2);
+      const decRight = cx + decW/2, decMid = y + decH/2;
+      const actionLeft = actX - actW/2;
+      line(decRight, decMid, actionLeft, decMid, 'yes');
+      branch((decRight + actionLeft)/2, decMid - 9, 'YES', true);
+      action(actX, decMid, actW, actH, d.yes.action, d.yes.action, d.yes.sub);
+      y += decH;
+      if (i < decisions.length - 1 || terminal) {
+        svgEl(svg, 'text', {x: cx + 14, y: y + 12, 'text-anchor':'start', 'font-size':11, 'font-weight':700, 'font-family':'JetBrains Mono,monospace', fill: '#64748b', 'dominant-baseline':'middle'}, 'NO');
+      }
+    });
+    if (terminal) {
+      line(cx, y, cx, y+gapV, 'no');
+      y += gapV;
+      action(cx, y + actH/2, actW, actH, terminal.action, terminal.action, terminal.sub);
+    }
+  }
+  renderPhase(cols.L, rows.TOP, 1, 'PHASE 01', 'TEST', 'spend < ₹3,000', [
+    {line1:'N = 0  AND', line2:'spend ≥ ₹3,000?', yes:{action:'KILL', sub:'rule of 3'}},
+    {line1:'N ≥ 1  AND', line2:'CPR ≤ ₹1,500?', yes:{action:'PROMOTE', sub:'→ Phase 2'}},
+  ], {action:'CONTINUE', sub:'₹500 / day'});
+  renderPhase(cols.R, rows.TOP, 2, 'PHASE 02', 'VALIDATE', '₹3,000 – ₹10,000', [
+    {line1:'Spend ≥ kill ladder', line2:'for current N?', yes:{action:'KILL', sub:'auto if N ≥ 6'}},
+    {line1:'N ≥ 6  AND', line2:'m ≤ 1.6?', yes:{action:'PROMOTE', sub:'→ Phase 3'}},
+  ], {action:'CONTINUE', sub:'₹1,000 / day'});
+  renderPhase(cols.L, rows.BOT, 3, 'PHASE 03', 'DECIDE', '₹10,000 – ₹20,000', [
+    {line1:'N ≥ 10  AND', line2:'m > 1.4?', yes:{action:'KILL', sub:'reclaim'}},
+    {line1:'N ≥ 15  AND', line2:'m ≤ 1.0 · freq<2?', yes:{action:'SCALE', sub:'→ P4 · ₹3k/d'}},
+  ], {action:'MAINTAIN', sub:'hold flat'});
+  renderPhase(cols.R, rows.BOT, 4, 'PHASE 04', 'SCALE', 'spend > ₹20,000', [
+    {line1:'7d m > 1.2 OR', line2:'freq ≥ 2.5?', yes:{action:'KILL', sub:'retire'}},
+    {line1:'7d m ≤ 1.0  AND', line2:'freq < 2.0?', yes:{action:'SCALE', sub:'+20%/wk'}},
+  ], {action:'HOLD', sub:'×0.8'});
+})();
+
+// ============== LIVE SIMULATOR (slide 6) ==============
+(function() {
+  const matrixEl = document.getElementById('sim-matrix');
+  if (!matrixEl) return;
+  const PEER = 501;
+  const UPPER95 = {0:3.69,1:5.57,2:7.22,3:8.77,4:10.24,5:11.67,6:13.06,7:14.42,8:15.76,9:17.08,10:18.39,12:20.96,15:24.74,20:30.89,30:42.83,50:65.92,100:121.51};
+  function upper95(n){if(n in UPPER95)return UPPER95[n];return n+1.96*Math.sqrt(n+1)+1.92}
+  function randNormal(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+  function randLogNormal(mu,sigma){return Math.exp(mu+sigma*randNormal())}
+  function randPoisson(lambda){if(lambda>30)return Math.max(0,Math.round(lambda+Math.sqrt(lambda)*randNormal()));let L=Math.exp(-lambda),k=0,p=1;do{k++;p*=Math.random()}while(p>L);return k-1}
+
+  function simulate(n, cprMed, sigma, killThresh) {
+    const mu = Math.log(cprMed);
+    const KILL_REF = PEER * killThresh;
+    const results = [];
+    for (let i = 0; i < n; i++) {
+      const trueCPR = randLogNormal(mu, sigma);
+      const trueRate = 1 / trueCPR;
+      let spend = 3000, payments = randPoisson(spend * trueRate);
+      if (payments === 0) { results.push({action:'KILL', trueCPR}); continue; }
+      if (spend/payments > 1500) { results.push({action:'CONTINUE', trueCPR}); continue; }
+      let killed = false;
+      while (spend < 10000) {
+        spend += 1000;
+        payments += randPoisson(1000 * trueRate);
+        if (spend >= upper95(payments) * KILL_REF) { results.push({action:'KILL', trueCPR}); killed = true; break; }
+      }
+      if (killed) continue;
+      if (payments >= 6 && spend/payments <= KILL_REF) {
+        while (spend < 20000) {
+          spend += 1000;
+          payments += randPoisson(1000 * trueRate);
+          const m = (spend/payments) / PEER;
+          if (payments >= 10 && m > 1.4) { results.push({action:'KILL', trueCPR}); killed = true; break; }
+          if (payments >= 15 && m <= 1.0) { results.push({action:'SCALE', trueCPR}); killed = true; break; }
+        }
+        if (!killed) {
+          const m = (spend/payments) / PEER;
+          if (payments >= 10 && m <= 1.4) results.push({action:'MAINTAIN', trueCPR});
+          else results.push({action:'CONTINUE', trueCPR});
+        }
+      } else {
+        results.push({action:'CONTINUE', trueCPR});
+      }
+    }
+    results.forEach(r => {
+      if (r.trueCPR <= PEER) r.truth = 'WINNER';
+      else if (r.trueCPR <= KILL_REF) r.truth = 'MEDIOCRE';
+      else r.truth = 'LOSER';
+    });
+    return results;
+  }
+
+  function fmtPct(n) { return (n*100).toFixed(1) + '%'; }
+
+  function render() {
+    const n = +document.getElementById('sim-n').value;
+    const cprMed = +document.getElementById('sim-cpr').value;
+    const sigma = +document.getElementById('sim-sigma').value;
+    const kt = +document.getElementById('sim-kt').value;
+    document.getElementById('sim-lbl-n').textContent = n;
+    document.getElementById('sim-lbl-cpr').textContent = '₹' + cprMed;
+    document.getElementById('sim-lbl-sigma').textContent = sigma.toFixed(2);
+    document.getElementById('sim-lbl-kt').textContent = kt.toFixed(1) + '×';
+    const results = simulate(n, cprMed, sigma, kt);
+    const count = (a, t) => results.filter(r => r.action === a && r.truth === t).length;
+    const cellS = (extra) => `padding:9px 6px;text-align:center;border-radius:6px;${extra}`;
+    matrixEl.innerHTML = `
+      <div style="${cellS('background:transparent')}"></div>
+      <div style="${cellS('background:#f8fafc;color:#64748b;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:11px 4px')}">Winner</div>
+      <div style="${cellS('background:#f8fafc;color:#64748b;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase')}">Mediocre</div>
+      <div style="${cellS('background:#f8fafc;color:#64748b;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase')}">Loser</div>
+      <div style="${cellS('background:#f8fafc;color:#334155;font-weight:600;text-align:left;padding-left:8px;font-size:11px')}">KILL</div>
+      <div style="${cellS('background:#fef2f2')}"><div style="font-size:14px;font-weight:700;color:#dc2626;font-family:JetBrains Mono,monospace">${count('KILL','WINNER')}</div><div style="font-size:9px;color:#dc2626">false kill</div></div>
+      <div style="${cellS('background:#fffbeb')}"><div style="font-size:14px;font-weight:700;color:#d97706;font-family:JetBrains Mono,monospace">${count('KILL','MEDIOCRE')}</div><div style="font-size:9px;color:#d97706">arguable</div></div>
+      <div style="${cellS('background:#ecfdf5')}"><div style="font-size:14px;font-weight:700;color:#059669;font-family:JetBrains Mono,monospace">${count('KILL','LOSER')}</div><div style="font-size:9px;color:#059669">correct</div></div>
+      <div style="${cellS('background:#f8fafc;color:#334155;font-weight:600;text-align:left;padding-left:8px;font-size:11px')}">MAINTAIN</div>
+      <div style="${cellS('background:#fffbeb')}"><div style="font-size:14px;font-weight:700;color:#d97706;font-family:JetBrains Mono,monospace">${count('MAINTAIN','WINNER')}</div><div style="font-size:9px;color:#d97706">under-scaled</div></div>
+      <div style="${cellS('background:#ecfdf5')}"><div style="font-size:14px;font-weight:700;color:#059669;font-family:JetBrains Mono,monospace">${count('MAINTAIN','MEDIOCRE')}</div><div style="font-size:9px;color:#059669">correct</div></div>
+      <div style="${cellS('background:#fffbeb')}"><div style="font-size:14px;font-weight:700;color:#d97706;font-family:JetBrains Mono,monospace">${count('MAINTAIN','LOSER')}</div><div style="font-size:9px;color:#d97706">over-kept</div></div>
+      <div style="${cellS('background:#f8fafc;color:#334155;font-weight:600;text-align:left;padding-left:8px;font-size:11px')}">SCALE</div>
+      <div style="${cellS('background:#ecfdf5')}"><div style="font-size:14px;font-weight:700;color:#059669;font-family:JetBrains Mono,monospace">${count('SCALE','WINNER')}</div><div style="font-size:9px;color:#059669">correct</div></div>
+      <div style="${cellS('background:#fffbeb')}"><div style="font-size:14px;font-weight:700;color:#d97706;font-family:JetBrains Mono,monospace">${count('SCALE','MEDIOCRE')}</div><div style="font-size:9px;color:#d97706">tolerable</div></div>
+      <div style="${cellS('background:#fef2f2')}"><div style="font-size:14px;font-weight:700;color:#dc2626;font-family:JetBrains Mono,monospace">${count('SCALE','LOSER')}</div><div style="font-size:9px;color:#dc2626">false scale</div></div>
+    `;
+    const tpKill = count('KILL','LOSER');
+    const fpKill = count('KILL','WINNER');
+    const totalKills = results.filter(r => r.action === 'KILL').length;
+    const totalLosers = results.filter(r => r.truth === 'LOSER').length;
+    const totalScales = results.filter(r => r.action === 'SCALE').length;
+    const tpScale = count('SCALE','WINNER');
+    const killPrecision = tpKill / Math.max(totalKills, 1);
+    const loserRecall = tpKill / Math.max(totalLosers, 1);
+    const scalePrecision = tpScale / Math.max(totalScales, 1);
+    function kpiCard(label, value, sub, color) {
+      return `<div style="font-size:10px;color:#64748b;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${label}</div>
+              <div style="font-size:28px;font-weight:800;color:${color};font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em;margin-top:6px">${value}</div>
+              <div style="font-size:10.5px;color:#64748b;margin-top:4px">${sub}</div>`;
+    }
+    document.getElementById('sim-kpi-precision').innerHTML = kpiCard('Kill precision', fmtPct(killPrecision), `${tpKill}/${totalKills} kills correct`, killPrecision >= 0.85 ? '#059669' : '#d97706');
+    document.getElementById('sim-kpi-recall').innerHTML = kpiCard('Loser recall', fmtPct(loserRecall), `${tpKill}/${totalLosers} losers caught`, loserRecall >= 0.6 ? '#059669' : '#d97706');
+    document.getElementById('sim-kpi-scalep').innerHTML = kpiCard('Scale precision', fmtPct(scalePrecision), `${tpScale}/${totalScales} scales correct`, scalePrecision >= 0.85 ? '#059669' : '#d97706');
+    let advice = '';
+    if (fpKill / Math.max(n, 1) > 0.05) advice = 'Threshold too tight — false kills accumulating.';
+    else if (loserRecall < 0.5) advice = 'Threshold too loose — losers slipping through.';
+    else advice = 'Algorithm well-calibrated for this population.';
+    document.getElementById('sim-summary').innerHTML = `<b>${advice}</b><br>Population ${n}, true CPR ~ ₹${cprMed} ± σ=${sigma.toFixed(2)}.`;
+  }
+  ['sim-n','sim-cpr','sim-sigma','sim-kt'].forEach(id => {
+    document.getElementById(id).addEventListener('input', render);
+  });
+
+  document.getElementById('sim-optimize').addEventListener('click', () => {
+    const btn = document.getElementById('sim-optimize');
+    const original = btn.textContent;
+    btn.textContent = 'Searching…'; btn.style.background = '#7c6cff';
+    setTimeout(() => {
+      const n = +document.getElementById('sim-n').value;
+      const cprMed = +document.getElementById('sim-cpr').value;
+      const sigma = +document.getElementById('sim-sigma').value;
+      const ACTION_COST = {KILL: 16000, MAINTAIN: 25000, SCALE: 70000, CONTINUE: 12000};
+      const BLEED = 40000;
+      let bestKt = 1.6, bestCPW = Infinity;
+      for (let i = 12; i <= 24; i++) {
+        const kt = i / 10;
+        const results = simulate(n, cprMed, sigma, kt);
+        const scaled = results.filter(r => r.action === 'SCALE').length;
+        if (scaled < Math.max(5, n * 0.005)) continue;
+        const baseCost = results.reduce((s, r) => s + ACTION_COST[r.action], 0);
+        const missedLosers = results.filter(r => r.truth === 'LOSER' && r.action !== 'KILL').length;
+        const cost = baseCost + missedLosers * BLEED;
+        const cpw = cost / scaled;
+        if (cpw < bestCPW) { bestCPW = cpw; bestKt = kt; }
+      }
+      const ktSlider = document.getElementById('sim-kt');
+      const current = +ktSlider.value;
+      let step = 0; const steps = 20; const target = bestKt;
+      function animate() {
+        if (step >= steps) {
+          ktSlider.value = target;
+          ktSlider.dispatchEvent(new Event('input'));
+          const fmt = (v) => '₹' + Math.round(v).toLocaleString('en-IN');
+          document.getElementById('sim-summary').innerHTML = '<b style="color:#059669">⚡ Optimum: ' + target.toFixed(1) + '×</b> · cost per winner ' + fmt(bestCPW);
+          document.getElementById('sim-summary').style.background = '#ecfdf5';
+          document.getElementById('sim-summary').style.borderColor = '#a7f3d0';
+          btn.textContent = '✓ Set to ' + target.toFixed(1) + '×';
+          btn.style.background = '#059669';
+          setTimeout(() => { btn.textContent = original; btn.style.background = '#0f172a'; }, 2400);
+          return;
+        }
+        const eased = step / steps;
+        ktSlider.value = current + (target - current) * eased;
+        ktSlider.dispatchEvent(new Event('input'));
+        step++; requestAnimationFrame(animate);
+      }
+      animate();
+    }, 60);
+  });
+
+  render();
+})();
+
+// ============== BAYESIAN POSTERIOR (slide 4) ==============
+(function() {
+  const svg = document.getElementById('bayes-svg');
+  if (!svg) return;
+  const W = 460, H = 290, pad = {l: 50, r: 20, t: 20, b: 36};
+  function el(tag, attrs, text) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    svg.appendChild(e); return e;
+  }
+  // Axes
+  const xMin = 0, xMax = 2000;
+  const xMap = v => pad.l + (v - xMin) / (xMax - xMin) * (W - pad.l - pad.r);
+  const yMap = v => H - pad.b - v * (H - pad.t - pad.b);
+
+  // Gridlines + x labels
+  [0, 500, 1000, 1500, 2000].forEach(v => {
+    el('line', {x1: xMap(v), y1: pad.t, x2: xMap(v), y2: H - pad.b, stroke: '#e2e8f0'});
+    el('text', {x: xMap(v), y: H - pad.b + 18, 'text-anchor':'middle', 'font-size':10.5, fill:'#64748b', 'font-family':'JetBrains Mono,monospace'}, '₹' + v);
+  });
+
+  // Reference lines
+  // Peer at 501
+  el('line', {x1: xMap(501), y1: pad.t, x2: xMap(501), y2: H - pad.b, stroke:'#059669', 'stroke-width':1.5, 'stroke-dasharray':'4 3'});
+  el('text', {x: xMap(501) + 4, y: pad.t + 12, 'font-size':10, fill:'#059669', 'font-weight':700}, 'peer ₹501');
+  // Kill at 802
+  el('line', {x1: xMap(802), y1: pad.t, x2: xMap(802), y2: H - pad.b, stroke:'#dc2626', 'stroke-width':1.5, 'stroke-dasharray':'4 3'});
+  el('text', {x: xMap(802) + 4, y: pad.t + 28, 'font-size':10, fill:'#dc2626', 'font-weight':700}, 'kill ₹802');
+
+  // Posterior curves — Gaussian approximations of Beta/Gamma posteriors
+  // As N grows: mean shifts toward observed CAC, std narrows ∝ 1/√N
+  function gaussian(x, mu, sigma) {
+    return Math.exp(-0.5 * Math.pow((x - mu)/sigma, 2)) / (sigma * Math.sqrt(2*Math.PI));
+  }
+
+  // Curves: each represents posterior belief at different tick
+  const curves = [
+    {N: 1, mu: 500, sigma: 480, color: '#cbd5e1', strokeW: 1.5, opacity: 0.6},
+    {N: 3, mu: 700, sigma: 290, color: '#94a3b8', strokeW: 1.7, opacity: 0.7},
+    {N: 8, mu: 950, sigma: 180, color: '#2563eb', strokeW: 2.0, opacity: 0.85},
+    {N: 15, mu: 1100, sigma: 130, color: '#dc2626', strokeW: 2.5, opacity: 1.0},
+  ];
+
+  // Normalize peaks to common max for visual comparison
+  const maxPeak = Math.max(...curves.map(c => gaussian(c.mu, c.mu, c.sigma)));
+
+  curves.forEach(c => {
+    let pts = [];
+    for (let x = xMin; x <= xMax; x += 10) {
+      const y = gaussian(x, c.mu, c.sigma) / maxPeak;
+      pts.push(xMap(x) + ',' + yMap(y));
+    }
+    el('polyline', {points: pts.join(' '), fill: 'none', stroke: c.color, 'stroke-width': c.strokeW, opacity: c.opacity});
+  });
+
+  // Label the final posterior with confidence
+  el('text', {x: xMap(1100), y: yMap(1.0) - 8, 'text-anchor':'middle', 'font-size':10.5, 'font-weight':700, fill:'#dc2626'}, '96% > ₹802');
+
+  // Bottom axis label
+  el('text', {x: W - pad.r, y: H - 4, 'text-anchor':'end', 'font-size':10, fill:'#64748b', 'font-style':'italic'}, 'true CAC (₹) →');
+})();
+
+
+// ============== PRESENTER MODE — VOICE-OVER + AUTO-ADVANCE ==============
+// Robust voice loading + idempotent start; works even if voices never load.
+let voices = [];
+let zivonVoice = null;
+let voicesLoaded = false;
+let presenting = false;
+let paused = false;
+let currentUtterance = null;
+let advanceTimer = null;
+let lastVideoPlayed = false;
+
+const MALE_PREFS = [
+  'Microsoft David Desktop','Microsoft David','Microsoft Mark Desktop','Microsoft Mark',
+  'Microsoft James','Microsoft Guy','Microsoft Andrew',
+  'Google US English Male','Google UK English Male',
+  'Daniel','Alex','Aaron','Fred','Oliver','Arthur','Rishi','Tom','Reed','Albert','Eddy','Grandpa'
+];
+
+function pickMaleVoice() {
+  if (!voices.length) return null;
+  for (const pref of MALE_PREFS) {
+    const v = voices.find(v => v.name && v.name.includes(pref));
+    if (v) return v;
+  }
+  const m = voices.find(v => v.name && /(male|man|guy)/i.test(v.name));
+  if (m) return m;
+  const en = voices.find(v => v.lang && /^en/i.test(v.lang));
+  return en || voices[0];
+}
+
+function populateVoiceSelect() {
+  const sel = document.getElementById('voice-select');
+  if (!sel) return;
+  if (!voices.length) {
+    sel.innerHTML = '<option>Voices loading…</option>';
+    return;
+  }
+  voicesLoaded = true;
+  const enVoices = voices.filter(v => v.lang && /^en/i.test(v.lang));
+  const useList = enVoices.length ? enVoices : voices;
+  sel.innerHTML = '';
+  useList.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = v.name + ' · ' + v.lang;
+    sel.appendChild(opt);
+  });
+  zivonVoice = pickMaleVoice();
+  if (zivonVoice && sel.querySelector(`option[value="${zivonVoice.name}"]`)) {
+    sel.value = zivonVoice.name;
+  }
+}
+
+function tryLoadVoices() {
+  try {
+    voices = speechSynthesis.getVoices() || [];
+    populateVoiceSelect();
+    return voices.length > 0;
+  } catch (e) { console.warn('Voice load error', e); return false; }
+}
+
+// Speech availability flag
+const speechOK = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+
+if (speechOK) {
+  // Try immediately
+  tryLoadVoices();
+  // Listen for the event
+  speechSynthesis.onvoiceschanged = tryLoadVoices;
+  // Aggressive polling fallback — many browsers don't fire onvoiceschanged reliably
+  let pollAttempts = 0;
+  const voicePoll = setInterval(() => {
+    pollAttempts++;
+    if (tryLoadVoices() || pollAttempts > 40) {
+      clearInterval(voicePoll);
+      if (!voicesLoaded) {
+        const sel = document.getElementById('voice-select');
+        if (sel) sel.innerHTML = '<option>No voices — will run silent</option>';
+      }
+    }
+  }, 250);
+} else {
+  const sel = document.getElementById('voice-select');
+  if (sel) sel.innerHTML = '<option>Speech not supported in this browser</option>';
+}
+
+// Voice picker change
+const voicePickerSel = document.getElementById('voice-select');
+if (voicePickerSel) {
+  voicePickerSel.addEventListener('change', () => {
+    if (!voices.length) return;
+    zivonVoice = voices.find(v => v.name === voicePickerSel.value) || zivonVoice;
+  });
+}
+
+function speakSlide(idx) {
+  if (!presenting) return;
+  const slide = slides[idx];
+  if (!slide) return;
+  const script = slide.dataset.script || '';
+  const fallbackMs = Math.max(8000, Math.min(28000, script.split(' ').length * 380));
+
+  // No script or no speech → fall back to timed advance
+  if (!script || !speechOK) {
+    if (advanceTimer) clearTimeout(advanceTimer);
+    advanceTimer = setTimeout(() => { if (presenting && current === idx) doAdvance(); }, script ? fallbackMs : 6000);
+    return;
+  }
+
+  try {
+    if (speechSynthesis.speaking || speechSynthesis.pending) {
+      speechSynthesis.cancel();
+    }
+    const u = new SpeechSynthesisUtterance(script);
+    if (zivonVoice) u.voice = zivonVoice;
+    u.rate = 1.05;
+    u.pitch = 0.9;
+    u.volume = 1.0;
+    let advanced = false;
+    u.onend = () => {
+      if (advanced) return;
+      advanced = true;
+      if (presenting && !paused && current === idx) {
+        advanceTimer = setTimeout(doAdvance, 350);
+      }
+    };
+    u.onerror = (e) => {
+      console.warn('Speech error', e);
+      if (advanced) return;
+      advanced = true;
+      if (presenting && current === idx) advanceTimer = setTimeout(doAdvance, 1000);
+    };
+    currentUtterance = u;
+    speechSynthesis.speak(u);
+
+    // Safety fallback — if no speech event fires within fallbackMs + 2s, advance
+    advanceTimer = setTimeout(() => {
+      if (!advanced && presenting && current === idx) {
+        advanced = true;
+        doAdvance();
+      }
+    }, fallbackMs + 3000);
+  } catch (e) {
+    console.error('Speech failed', e);
+    advanceTimer = setTimeout(() => { if (presenting && current === idx) doAdvance(); }, fallbackMs);
+  }
+}
+
+function doAdvance() {
+  if (!presenting) return;
+  if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+  if (current >= slides.length - 1) {
+    handleLastSlide();
+    return;
+  }
+  const nextIdx = current + 1;
+  go(nextIdx);
+  updateHud();
+  if (slides[nextIdx] && slides[nextIdx].classList.contains('end')) {
+    speakSlide(nextIdx);
+    // chain video to fire after speech ends — handled separately
+    if (currentUtterance) {
+      const origEnd = currentUtterance.onend;
+      currentUtterance.onend = () => {
+        if (origEnd) origEnd();
+        if (presenting && current === nextIdx) playLastVideoOnce();
+      };
+    } else {
+      setTimeout(() => { if (presenting && current === nextIdx) playLastVideoOnce(); }, 3000);
+    }
+  } else {
+    setTimeout(() => speakSlide(nextIdx), 250);
+  }
+}
+
+function playLastVideoOnce() {
+  if (lastVideoPlayed) return;
+  lastVideoPlayed = true;
+  const v = document.getElementById('close-video');
+  if (!v) { showEndCard(); return; }
+  v.muted = false;
+  v.volume = 1.0;
+  v.currentTime = 0;
+  v.loop = false;
+  const p = v.play();
+  if (p && p.catch) {
+    p.catch(() => { v.muted = true; v.play().catch(() => {}); });
+  }
+  v.onended = () => showEndCard();
+  setTimeout(() => { if (!document.getElementById('end-card').classList.contains('show')) showEndCard(); }, 30000);
+}
+
+function handleLastSlide() {
+  if (!lastVideoPlayed) playLastVideoOnce();
+  else showEndCard();
+}
+
+function showEndCard() {
+  presenting = false;
+  const card = document.getElementById('end-card');
+  if (card) card.classList.add('show');
+}
+
+function updateHud() {
+  const hud = document.getElementById('hud-slide');
+  if (hud) hud.textContent = `SLIDE ${String(current+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
+}
+
+function startPresentation() {
+  presenting = true;
+  paused = false;
+  lastVideoPlayed = false;
+  const overlay = document.getElementById('start-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+  }
+  const hud = document.getElementById('presenter-hud');
+  if (hud) hud.classList.add('show');
+  const endCard = document.getElementById('end-card');
+  if (endCard) endCard.classList.remove('show');
+  go(0);
+  updateHud();
+  // Give browser a moment to register user interaction before speech
+  setTimeout(() => speakSlide(0), 500);
+}
+
+function stopPresentation() {
+  presenting = false;
+  if (speechOK) speechSynthesis.cancel();
+  if (advanceTimer) clearTimeout(advanceTimer);
+  const hud = document.getElementById('presenter-hud');
+  if (hud) hud.classList.remove('show');
+  const v = document.getElementById('close-video');
+  if (v) v.pause();
+}
+
+function togglePause() {
+  if (!presenting) return;
+  paused = !paused;
+  const btn = document.getElementById('hud-pause');
+  if (paused) {
+    if (speechOK) speechSynthesis.pause();
+    if (advanceTimer) clearTimeout(advanceTimer);
+    if (btn) btn.textContent = '▶';
+  } else {
+    if (speechOK) speechSynthesis.resume();
+    if (btn) btn.textContent = '⏸';
+  }
+}
+
+// ATTACH CLICK HANDLERS — outside any function, so they always run
+// even if voice-loading code fails or throws.
+const startBtn = document.getElementById('start-btn');
+if (startBtn) startBtn.addEventListener('click', startPresentation);
+
+const restartBtn = document.getElementById('restart-btn');
+if (restartBtn) restartBtn.addEventListener('click', () => {
+  lastVideoPlayed = false;
+  const v = document.getElementById('close-video');
+  if (v) { v.pause(); v.currentTime = 0; }
+  const endCard = document.getElementById('end-card');
+  if (endCard) endCard.classList.remove('show');
+  startPresentation();
+});
+
+const pauseBtn = document.getElementById('hud-pause');
+if (pauseBtn) pauseBtn.addEventListener('click', togglePause);
+
+const stopBtn = document.getElementById('hud-stop');
+if (stopBtn) stopBtn.addEventListener('click', () => {
+  stopPresentation();
+  const endCard = document.getElementById('end-card');
+  if (endCard) endCard.classList.remove('show');
+  const overlay = document.getElementById('start-overlay');
+  if (overlay) { overlay.style.display = 'flex'; overlay.classList.remove('hidden'); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (!presenting) return;
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    if (speechOK) speechSynthesis.cancel();
+    if (advanceTimer) clearTimeout(advanceTimer);
+    doAdvance();
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowLeft') {
+    if (speechOK) speechSynthesis.cancel();
+    if (advanceTimer) clearTimeout(advanceTimer);
+    setTimeout(() => {
+      if (presenting) {
+        updateHud();
+        if (current < slides.length) speakSlide(current);
+      }
+    }, 100);
+  }
+});
+
+// Last-resort: re-attach start handler in case button wasn't ready when this ran
+setTimeout(() => {
+  const sb = document.getElementById('start-btn');
+  if (sb && !sb.dataset.wired) {
+    sb.dataset.wired = '1';
+    sb.addEventListener('click', startPresentation);
+  }
+}, 500);
+
+
+// ============== DECISION MATRIX (slide 6) ==============
+(function() {
+  const svg = document.getElementById('decision-matrix');
+  if (!svg) return;
+  const W = 1500, H = 480, pad = {l: 90, r: 200, t: 40, b: 60};
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    svg.appendChild(e); return e;
+  }
+  const xLo = Math.log10(1), xHi = Math.log10(300);
+  const xMap = n => pad.l + (Math.log10(Math.max(1, Math.min(300, n))) - xLo) / (xHi - xLo) * (W - pad.l - pad.r);
+  const yMax = 3.5;
+  const yMap = m => pad.t + (1 - Math.min(m, yMax) / yMax) * (H - pad.t - pad.b);
+  el('rect', {x: xMap(20), y: yMap(yMax), width: xMap(300) - xMap(20), height: yMap(1.6) - yMap(yMax), fill: '#dc2626', 'fill-opacity': 0.08});
+  el('rect', {x: xMap(15), y: yMap(1.0), width: xMap(300) - xMap(15), height: yMap(0) - yMap(1.0), fill: '#059669', 'fill-opacity': 0.06});
+  [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach(v => {
+    const y = yMap(v);
+    el('line', {x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: '#e2e8f0', 'stroke-width': 1});
+    el('text', {x: pad.l - 10, y, 'text-anchor':'end', 'font-size':13, fill:'#64748b', 'font-family':'JetBrains Mono,monospace', 'dominant-baseline':'middle'}, v.toFixed(1) + '×');
+  });
+  [1, 3, 10, 30, 100, 300].forEach(n => {
+    const x = xMap(n);
+    el('line', {x1: x, y1: pad.t, x2: x, y2: H - pad.b, stroke: '#e2e8f0'});
+    el('text', {x, y: H - pad.b + 24, 'text-anchor':'middle', 'font-size':13, fill:'#64748b', 'font-family':'JetBrains Mono,monospace'}, 'N=' + n);
+  });
+  el('line', {x1: pad.l, y1: yMap(1), x2: W - pad.r, y2: yMap(1), stroke:'#34d6c8', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  el('text', {x: pad.l + 10, y: yMap(1) - 8, fill:'#059669', 'font-size':12, 'font-weight':700}, 'peer benchmark (m=1.0)');
+  el('line', {x1: pad.l, y1: yMap(1.6), x2: W - pad.r, y2: yMap(1.6), stroke:'#dc2626', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  el('text', {x: pad.l + 10, y: yMap(1.6) - 8, fill:'#dc2626', 'font-size':12, 'font-weight':700}, 'kill threshold (m=1.6)');
+  el('line', {x1: xMap(20), y1: pad.t, x2: xMap(20), y2: H - pad.b, stroke:'#7c6cff', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  el('text', {x: xMap(20) + 8, y: pad.t + 16, fill:'#7c6cff', 'font-size':12, 'font-weight':700}, 'N≥20 confidence floor');
+  el('text', {x: (xMap(20) + W - pad.r)/2, y: pad.t + 36, 'text-anchor':'middle', 'font-size':16, 'font-weight':800, fill:'#dc2626', 'letter-spacing':'.2em'}, 'KILL ZONE');
+  el('text', {x: (pad.l + xMap(20))/2, y: pad.t + 36, 'text-anchor':'middle', 'font-size':14, 'font-weight':700, fill:'#94a3b8', 'letter-spacing':'.18em'}, 'NEEDS MORE DATA');
+  el('text', {x: (xMap(15) + W - pad.r)/2, y: H - pad.b - 18, 'text-anchor':'middle', 'font-size':16, 'font-weight':800, fill:'#059669', 'letter-spacing':'.2em'}, 'SCALE ZONE');
+  el('text', {x: W - pad.r, y: H - 16, 'text-anchor':'end', 'font-size':12, fill:'#64748b', 'font-style':'italic'}, 'payments N (log scale) →');
+  el('text', {x: pad.l - 60, y: pad.t + 16, 'font-size':12, fill:'#64748b', 'font-style':'italic'}, '↑ × peer');
+  function rand(a,b){return a+Math.random()*(b-a)}
+  function logRand(a,b){return Math.exp(rand(Math.log(a),Math.log(b)))}
+  const colors = {KILL:'#dc2626', WATCH:'#d97706', KEEP:'#059669', INSUFF:'#94a3b8'};
+  const dots = [];
+  for (let i = 0; i < 8; i++) dots.push({n: Math.round(logRand(25, 220)), m: rand(1.7, 2.9), v:'KILL', s: rand(9, 22)});
+  for (let i = 0; i < 16; i++) dots.push({n: Math.round(logRand(8, 70)), m: rand(1.0, 1.6), v:'WATCH', s: rand(7, 15)});
+  for (let i = 0; i < 26; i++) dots.push({n: Math.round(logRand(15, 280)), m: rand(0.35, 1.0), v:'KEEP', s: rand(8, 24)});
+  for (let i = 0; i < 28; i++) dots.push({n: Math.round(logRand(1, 8)), m: rand(0.2, 2.8), v:'INSUFF', s: rand(5, 9)});
+  dots.forEach(d => el('circle', {cx: xMap(d.n), cy: yMap(d.m), r: d.s/2, fill: colors[d.v], 'fill-opacity': 0.55, stroke: colors[d.v], 'stroke-opacity': 0.85, 'stroke-width': 1}));
+  const lx = W - pad.r + 30;
+  const legItems = [{c:'#dc2626', l:'STOP NOW'}, {c:'#d97706', l:'WATCH'}, {c:'#059669', l:'KEEP'}, {c:'#94a3b8', l:'INSUFFICIENT'}];
+  legItems.forEach((li, i) => {
+    el('circle', {cx: lx, cy: pad.t + 70 + i*26, r: 6, fill: li.c, 'fill-opacity': 0.7});
+    el('text', {x: lx + 14, y: pad.t + 70 + i*26, 'font-size':12.5, fill:'#334155', 'dominant-baseline':'middle', 'font-weight':500}, li.l);
+  });
+})();
+
+
+// ============== PROBLEM · BROKEN CPR vs SPEND (slide 3) ==============
+(function() {
+  const svg = document.getElementById('problem-broken-scatter');
+  if (!svg) return;
+  const W = 1500, H = 500, pad = {l: 90, r: 220, t: 50, b: 60};
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    svg.appendChild(e); return e;
+  }
+  // X: log spend ₹100 → ₹100,000
+  const xLo = Math.log10(100), xHi = Math.log10(100000);
+  const xMap = s => pad.l + (Math.log10(Math.max(100, Math.min(100000, s))) - xLo) / (xHi - xLo) * (W - pad.l - pad.r);
+  // Y: CPR ₹0 → ₹3000 (linear)
+  const yMax = 3000;
+  const yMap = c => pad.t + (1 - Math.min(c, yMax) / yMax) * (H - pad.t - pad.b);
+
+  // Gridlines + y axis
+  [0, 500, 1000, 1500, 2000, 2500, 3000].forEach(c => {
+    const y = yMap(c);
+    el('line', {x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: '#e2e8f0', 'stroke-width': 1});
+    el('text', {x: pad.l - 10, y, 'text-anchor':'end', 'font-size':13, fill:'#64748b', 'font-family':'JetBrains Mono,monospace', 'dominant-baseline':'middle'}, '₹' + c);
+  });
+  // X axis ticks
+  [100, 500, 1000, 5000, 10000, 50000, 100000].forEach(s => {
+    const x = xMap(s);
+    el('line', {x1: x, y1: pad.t, x2: x, y2: H - pad.b, stroke: '#e2e8f0', 'stroke-width': 1});
+    el('text', {x, y: H - pad.b + 24, 'text-anchor':'middle', 'font-size':13, fill:'#64748b', 'font-family':'JetBrains Mono,monospace'}, '₹' + (s >= 1000 ? (s/1000)+'k' : s));
+  });
+  // Axis labels
+  el('text', {x: W - pad.r, y: H - 14, 'text-anchor':'end', 'font-size':12, fill:'#64748b', 'font-style':'italic'}, 'spend (log) →');
+  el('text', {x: pad.l - 60, y: pad.t + 18, 'font-size':12, fill:'#64748b', 'font-style':'italic'}, '↑ CPR (₹)');
+
+  // Draw the isolines for various N values — these are CPR = spend/N
+  const isolines = [
+    {N: 1, color: '#dc2626', count: 14, label: 'N=1'},
+    {N: 2, color: '#ea580c', count: 12, label: 'N=2'},
+    {N: 3, color: '#d97706', count: 10, label: 'N=3'},
+    {N: 5, color: '#ca8a04', count: 9, label: 'N=5'},
+    {N: 10, color: '#65a30d', count: 8, label: 'N=10'},
+    {N: 20, color: '#059669', count: 5, label: 'N=20'},
+  ];
+
+  isolines.forEach(iso => {
+    // Draw the isoline as a faint dashed curve
+    let pathD = '';
+    for (let s = 100; s <= 100000; s *= 1.15) {
+      const cpr = s / iso.N;
+      if (cpr > yMax) break;
+      pathD += (pathD ? 'L' : 'M') + xMap(s) + ' ' + yMap(cpr) + ' ';
+    }
+    el('path', {d: pathD, fill: 'none', stroke: iso.color, 'stroke-width': 1, 'stroke-dasharray': '3 4', opacity: 0.45});
+
+    // Place dots along the isoline
+    for (let i = 0; i < iso.count; i++) {
+      // Random spend within visible range
+      const minSpend = Math.max(100, iso.N * 30);
+      const maxSpend = Math.min(100000, iso.N * 2800);
+      const spend = Math.exp(Math.log(minSpend) + Math.random() * (Math.log(maxSpend) - Math.log(minSpend)));
+      const cpr = spend / iso.N;
+      const r = 4 + Math.random() * 4;
+      el('circle', {cx: xMap(spend), cy: yMap(cpr), r, fill: iso.color, 'fill-opacity': 0.7, stroke: iso.color, 'stroke-opacity': 0.9, 'stroke-width': 1});
+    }
+  });
+
+  // Peer benchmark line at ₹501
+  el('line', {x1: pad.l, y1: yMap(501), x2: W - pad.r, y2: yMap(501), stroke:'#34d6c8', 'stroke-width':1.5, 'stroke-dasharray':'5 3'});
+  el('text', {x: pad.l + 10, y: yMap(501) - 8, fill:'#0d9488', 'font-size':12, 'font-weight':700}, 'peer benchmark ₹501');
+
+  // Annotation: red callout box pointing at the artifact
+  el('rect', {x: 920, y: 90, width: 360, height: 70, rx: 10, ry: 10, fill: '#fef2f2', stroke: '#fecaca', 'stroke-width': 1.5});
+  el('text', {x: 1100, y: 112, 'text-anchor':'middle', 'font-size':13, 'font-weight':700, fill:'#dc2626'}, 'These "curves" are not trends.');
+  el('text', {x: 1100, y: 135, 'text-anchor':'middle', 'font-size':12, fill:'#7f1d1d'}, 'Each band = one fixed N (payments)');
+  el('text', {x: 1100, y: 152, 'text-anchor':'middle', 'font-size':11, fill:'#7f1d1d', 'font-style':'italic'}, 'pure math artifact of spend ÷ integer N');
+  // Arrow from callout to a cluster of N=2 dots
+  el('path', {d: 'M 1010 165 Q 950 230 760 380', fill:'none', stroke:'#dc2626', 'stroke-width':1.5, 'fill-opacity':0});
+  el('polygon', {points: '755,378 770,390 762,392', fill:'#dc2626'});
+
+  // Legend for isolines
+  const lx = W - pad.r + 30;
+  el('text', {x: lx, y: pad.t + 16, 'font-size':11, 'font-weight':700, fill:'#334155', 'letter-spacing':'.08em'}, 'PAYMENT COUNT');
+  isolines.forEach((iso, i) => {
+    el('line', {x1: lx, y1: pad.t + 36 + i*22, x2: lx + 18, y2: pad.t + 36 + i*22, stroke: iso.color, 'stroke-width': 1.5, 'stroke-dasharray':'3 3'});
+    el('circle', {cx: lx + 9, cy: pad.t + 36 + i*22, r: 4, fill: iso.color, 'fill-opacity': 0.7});
+    el('text', {x: lx + 26, y: pad.t + 36 + i*22, 'font-size':12, fill:'#334155', 'dominant-baseline':'middle', 'font-weight':500}, iso.label);
+  });
+})();
+
+</script>
+</body></html>
