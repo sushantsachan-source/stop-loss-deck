@@ -218,7 +218,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:var(--ink
 <div class="end-card" id="end-card">
   <h2>Thank you.</h2>
   <p>Genesis 2026 · Stop Loss · Marketing · Growth</p>
-  <button class="restart-btn" id="restart-btn">↻ Restart Presentation</button>
+  
 </div>
 
 
@@ -233,7 +233,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:var(--ink
         <p class="tagline">How we taught a marketing engine to think like a <b>trading desk</b> — cut the losers in hours, compound the winners, learn from every trade.</p>
       </div>
       <div class="cover-image">
-        <img src="Screenshot%202026-06-12%20at%201.09.54%E2%80%AFPM.png" alt="Stop Loss mascot — SpeakX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="stop_loss_mascot.png" alt="Stop Loss mascot — SpeakX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="img-fallback" style="display:none">
           <div class="ic">🛡️</div>
           <div>Save the mascot image as<br><b style="color:#cbd5e1;font-size:14px">stop_loss_mascot.png</b><br>in this folder to display here.</div>
@@ -1277,15 +1277,7 @@ function togglePause() {
 const startBtn = document.getElementById('start-btn');
 if (startBtn) startBtn.addEventListener('click', startPresentation);
 
-const restartBtn = document.getElementById('restart-btn');
-if (restartBtn) restartBtn.addEventListener('click', () => {
-  lastVideoPlayed = false;
-  const v = document.getElementById('close-video');
-  if (v) { v.pause(); v.currentTime = 0; }
-  const endCard = document.getElementById('end-card');
-  if (endCard) endCard.classList.remove('show');
-  startPresentation();
-});
+// Restart functionality removed — final slide is the natural end state.
 
 const pauseBtn = document.getElementById('hud-pause');
 if (pauseBtn) pauseBtn.addEventListener('click', togglePause);

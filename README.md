@@ -1,30 +1,44 @@
 # Stop Loss · Genesis 2026
 
-A statistically-confident, agent-driven creative engine that teaches marketing to think like a trading desk.
+> How we taught a marketing engine to think like a trading desk — cut the losers in hours, compound the winners, learn from every trade.
 
 **Team:** Sushant Sachan · Suyash Mishra
 **Submission:** Genesis 2026 · Marketing · Growth
 
-## View the presentation
+## View the deck
 
-Live deck (with voice-over): [GitHub Pages link will appear here after deployment]
+Live: `https://<username>.github.io/stop-loss-deck/`
 
 ## Run locally
 
-Just open `index.html` in Chrome or Edge. Click "Start Presentation" and Zivon walks through all 13 slides in ~3:30 with voice-over.
+Open `index.html` in **Chrome** or **Edge** (best Web Speech API support).
+Click ▶ **Start Presentation**. Zivon walks through all 13 slides in ~3:30.
+
+## Controls
+
+| Action | Key |
+|---|---|
+| Next slide | → / Space |
+| Previous slide | ← |
+| Skip narration | Esc |
+| Pause / Resume | HUD ⏸ |
+| Stop | HUD ■ |
 
 ## Files
 
-- `index.html` — the deck (self-contained, no build step)
-- `stop_loss_mascot.png` — Zivon mascot (cover slide)
-- `yes_do_it.mp4` — closing video (last slide)
-- `.nojekyll` — disables Jekyll processing on GitHub Pages
+| File | Purpose |
+|---|---|
+| `index.html` | The 13-slide presentation (self-contained) |
+| `stop_loss_mascot.png` | Zivon mascot · cover slide |
+| `yes_do_it.mp4` | Closing video · slide 13 |
+| `.nojekyll` | Disables Jekyll on GitHub Pages |
 
-## Controls during presentation
+## Deploy to GitHub Pages
 
-- **Start** — click Start button on splash
-- **→ / Space** — next slide
-- **←** — previous slide
-- **Esc** — skip narration
-- **HUD ⏸** — pause speech
-- **HUD ■** — stop
+```bash
+gh repo create stop-loss-deck --public --source=. --push
+gh api -X POST /repos/{owner}/stop-loss-deck/pages \
+  -f source[branch]=main -f source[path]=/
+```
+
+Wait ~30 seconds, then visit `https://<your-username>.github.io/stop-loss-deck/`.
