@@ -233,7 +233,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:var(--ink
         <p class="tagline">How we taught a marketing engine to think like a <b>trading desk</b> — cut the losers in hours, compound the winners, learn from every trade.</p>
       </div>
       <div class="cover-image">
-        <img src="stop_loss_mascot.png" alt="Stop Loss mascot — SpeakX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="Screenshot%202026-06-12%20at%201.09.54%E2%80%AFPM.png" alt="Stop Loss mascot — SpeakX" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="img-fallback" style="display:none">
           <div class="ic">🛡️</div>
           <div>Save the mascot image as<br><b style="color:#cbd5e1;font-size:14px">stop_loss_mascot.png</b><br>in this folder to display here.</div>
@@ -1178,7 +1178,7 @@ function playLastVideoOnce() {
   if (lastVideoPlayed) return;
   lastVideoPlayed = true;
   const v = document.getElementById('close-video');
-  if (!v) { showEndCard(); return; }
+  if (!v) { setTimeout(showEndCard, 3000); return; }
   v.muted = false;
   v.volume = 1.0;
   v.currentTime = 0;
@@ -1187,8 +1187,30 @@ function playLastVideoOnce() {
   if (p && p.catch) {
     p.catch(() => { v.muted = true; v.play().catch(() => {}); });
   }
-  v.onended = () => showEndCard();
-  setTimeout(() => { if (!document.getElementById('end-card').classList.contains('show')) showEndCard(); }, 30000);
+  // Wait for video to finish naturally, then linger 3 seconds before end card
+  // so the viewer can absorb the final frame.
+  v.onended = () => {
+    setTimeout(showEndCard, 3000);
+  };
+  // Safety fallback: derive timeout from video duration once metadata loads;
+  // never fire before video has a reasonable chance to complete.
+  function setSafetyTimer() {
+    const dur = (isFinite(v.duration) && v.duration > 0) ? v.duration : 12;
+    // total = video duration + 3s linger + 5s buffer
+    const totalMs = (dur + 8) * 1000;
+    setTimeout(() => {
+      if (!document.getElementById('end-card').classList.contains('show')) {
+        showEndCard();
+      }
+    }, totalMs);
+  }
+  if (v.readyState >= 1 && isFinite(v.duration)) {
+    setSafetyTimer();
+  } else {
+    v.addEventListener('loadedmetadata', setSafetyTimer, { once: true });
+    // ultimate fallback if metadata never loads
+    setTimeout(() => { if (!document.getElementById('end-card').classList.contains('show')) showEndCard(); }, 45000);
+  }
 }
 
 function handleLastSlide() {
