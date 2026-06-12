@@ -185,13 +185,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:var(--ink
 .presenter-hud button{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:14px;padding:0 4px}
 .presenter-hud button:hover{color:white}
 
-/* End card */
-.end-card{position:fixed;inset:0;background:rgba(15,23,42,.92);z-index:1500;display:none;align-items:center;justify-content:center;flex-direction:column;color:white}
-.end-card.show{display:flex}
-.end-card h2{font-family:'Space Grotesk',sans-serif;font-size:54px;font-weight:900;letter-spacing:-.03em;margin-bottom:14px}
-.end-card p{font-size:16px;color:#94a3b8;margin-bottom:32px;text-align:center}
-.end-card .restart-btn{padding:14px 32px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.04em}
-
 </style></head>
 <body>
 
@@ -214,13 +207,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:var(--ink
   <button id="hud-pause" title="Pause / Resume">⏸</button>
   <button id="hud-stop" title="Stop presentation">■</button>
 </div>
-
-<div class="end-card" id="end-card">
-  <h2>Thank you.</h2>
-  <p>Genesis 2026 · Stop Loss · Marketing · Growth</p>
-  
-</div>
-
 
 <div class="stage"><div class="deck" id="deck">
 
@@ -1178,7 +1164,7 @@ function playLastVideoOnce() {
   if (lastVideoPlayed) return;
   lastVideoPlayed = true;
   const v = document.getElementById('close-video');
-  if (!v) { setTimeout(showEndCard, 3000); return; }
+  if (!v) { endShow(); return; }
   v.muted = false;
   v.volume = 1.0;
   v.currentTime = 0;
@@ -1187,41 +1173,33 @@ function playLastVideoOnce() {
   if (p && p.catch) {
     p.catch(() => { v.muted = true; v.play().catch(() => {}); });
   }
-  // Wait for video to finish naturally, then linger 3 seconds before end card
-  // so the viewer can absorb the final frame.
-  v.onended = () => {
-    setTimeout(showEndCard, 3000);
-  };
+  // Wait for video to finish naturally, then end the show quietly so the
+  // final frame stays on screen — no end-card overlay.
+  v.onended = endShow;
   // Safety fallback: derive timeout from video duration once metadata loads;
   // never fire before video has a reasonable chance to complete.
   function setSafetyTimer() {
     const dur = (isFinite(v.duration) && v.duration > 0) ? v.duration : 12;
-    // total = video duration + 3s linger + 5s buffer
-    const totalMs = (dur + 8) * 1000;
-    setTimeout(() => {
-      if (!document.getElementById('end-card').classList.contains('show')) {
-        showEndCard();
-      }
-    }, totalMs);
+    // total = video duration + 5s buffer
+    const totalMs = (dur + 5) * 1000;
+    setTimeout(endShow, totalMs);
   }
   if (v.readyState >= 1 && isFinite(v.duration)) {
     setSafetyTimer();
   } else {
     v.addEventListener('loadedmetadata', setSafetyTimer, { once: true });
     // ultimate fallback if metadata never loads
-    setTimeout(() => { if (!document.getElementById('end-card').classList.contains('show')) showEndCard(); }, 45000);
+    setTimeout(endShow, 45000);
   }
 }
 
 function handleLastSlide() {
   if (!lastVideoPlayed) playLastVideoOnce();
-  else showEndCard();
+  else endShow();
 }
 
-function showEndCard() {
+function endShow() {
   presenting = false;
-  const card = document.getElementById('end-card');
-  if (card) card.classList.add('show');
 }
 
 function updateHud() {
@@ -1240,8 +1218,6 @@ function startPresentation() {
   }
   const hud = document.getElementById('presenter-hud');
   if (hud) hud.classList.add('show');
-  const endCard = document.getElementById('end-card');
-  if (endCard) endCard.classList.remove('show');
   go(0);
   updateHud();
   // Give browser a moment to register user interaction before speech
@@ -1285,8 +1261,6 @@ if (pauseBtn) pauseBtn.addEventListener('click', togglePause);
 const stopBtn = document.getElementById('hud-stop');
 if (stopBtn) stopBtn.addEventListener('click', () => {
   stopPresentation();
-  const endCard = document.getElementById('end-card');
-  if (endCard) endCard.classList.remove('show');
   const overlay = document.getElementById('start-overlay');
   if (overlay) { overlay.style.display = 'flex'; overlay.classList.remove('hidden'); }
 });
